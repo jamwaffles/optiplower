@@ -2161,7 +2161,7 @@
     (property "Datasheet" "~" (at 129.54 45.72 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "C17513" (at 129.54 45.72 0)
+    (property "LCSC" "C719174" (at 129.54 45.72 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "MPN" "TC33X-2-102E" (at 129.54 45.72 0)

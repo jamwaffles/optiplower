@@ -1,0 +1,16 @@
+(footprint "5.08_PWR_IN" (version 20221018) (generator pcbnew)
+  (layer "F.Cu")
+  (descr "5.08mm spaced power input")
+  (tags "5.08mm power input")
+  (attr through_hole exclude_from_bom)
+  (fp_text reference "REF**" (at 2.54 -3.2) (layer "F.SilkS") hide
+      (effects (font (size 1 1) (thickness 0.15)))
+    (tstamp 68137617-af1a-48a0-972d-e0ee0114843e)
+  )
+  (fp_text value "INPUT" (at 2.54 11.2) (layer "F.Fab") hide
+      (effects (font (size 1 1) (thickness 0.15)))
+    (tstamp 0a025997-18f2-49c1-b35a-53379a51bf16)
+  )
+  (pad "1" thru_hole roundrect (at 0 0) (size 2.08 3.6) (drill 1.4) (layers "*.Cu" "*.Mask") (roundrect_rratio 0.120192) (tstamp 214837bf-0d06-4f45-9578-b00d1818d030))
+  (pad "2" thru_hole oval (at 5.08 0) (size 2.08 3.6) (drill 1.4) (layers "*.Cu" "*.Mask") (tstamp 67872cf3-cc6b-4096-a0be-250e1bfe6e6e))
+)

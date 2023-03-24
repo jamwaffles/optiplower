@@ -1179,11 +1179,6 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid b29f4bfb-1684-48ad-9984-8747ff56f0e1)
   )
-  (text "TODO: Custom TO-252-2 package with different pins for Schottky diode"
-    (at 76.2 66.04 0)
-    (effects (font (size 1.27 1.27)) (justify left bottom))
-    (uuid d683192b-08c2-4cf9-9d67-21f817004960)
-  )
 
   (label "SENSE" (at 90.17 104.14 180) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify right bottom))

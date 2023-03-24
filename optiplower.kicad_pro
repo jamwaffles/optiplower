@@ -404,7 +404,9 @@
     "pinned_footprint_libs": [
       "Optiplower"
     ],
-    "pinned_symbol_libs": []
+    "pinned_symbol_libs": [
+      "Optiplower"
+    ]
   },
   "meta": {
     "filename": "optiplower.kicad_pro",

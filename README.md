@@ -18,13 +18,42 @@ This project aims to solve both by incorporating:
 
 Onto a single, tiny PCB that can be hidden away inside the Dell.
 
-With thanks to
+References:
 
 - <https://github.com/KivApple/dell-charger-emulator>
 - <https://github.com/garyStofer/DS2502_DELL_PS>
+- <https://github.com/timothyjager/DellPSU>
 - Among others
 
 Please use KiCAD 7 to open the board files. The PSU uses JLC/LCSC-sourcable parts if you'd like to
 build your own.
 
 ![](./img/layout.png)
+
+DigiSpark ATTiny85 devboard LED is connected to PB0
+
+## Sample dumps
+
+- `DELL00AC090195046CN09T` (90w) from
+  <https://github.com/garyStofer/DS2502_DELL_PS/blob/master/DS2502_DELL_PS.ino> or
+  `DELL00AC090195046CN09T2157161543835EAL03` with checksum
+- `"DELL00AC045195023CN0CDF577243865Q27F2A05=\x94"` (45w)
+
+## Firmware setup
+
+```bash
+apt install gcc-avr avr-libc
+# For reading/writing IC once programmed
+pip3 install pyserial
+
+make
+
+# Write to device
+make load
+
+# Write EEPROM (generated with `dell-charger-data-editor.py`)
+make load_eeprom
+
+# Write code
+make load_rom
+```

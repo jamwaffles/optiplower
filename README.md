@@ -23,6 +23,7 @@ References:
 - <https://github.com/KivApple/dell-charger-emulator>
 - <https://github.com/garyStofer/DS2502_DELL_PS>
 - <https://github.com/timothyjager/DellPSU>
+- <https://www.instructables.com/Embedded-EEPROM-Into-DELL-Laptop-for-Charger-Ident/>
 - Among others
 
 Please use KiCAD 7 to open the board files. The PSU uses JLC/LCSC-sourcable parts if you'd like to

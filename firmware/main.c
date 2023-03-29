@@ -330,22 +330,24 @@ int main(void)
 	// Disable ADC, TIM1 and USI
 	PRR |= _BV(PRADC) | _BV(PRUSI) | _BV(PRTIM1);
 
+	OW_PULL_LOW();
+
 	DDRB = 0;
 	PORTB = 0xFF;
-	// Check EEPROM and load default values if needed
-	OW_PULL_LOW();
-	if (eeprom_read_byte((const uint8_t *)0) == 0xFF)
-	{
-		for (uint8_t i = 0; i < EEPROM_DATA_LENGTH; i++)
-		{
-			eeprom_write_byte(((uint8_t *)0) + i, pgm_read_byte(default_eeprom_data + i));
-		}
-	}
-	else
-	{
-		_delay_us(10);
-	}
-	OW_RELEASE();
+	// // Check EEPROM and load default values if needed
+	// OW_PULL_LOW();
+	// if (eeprom_read_byte((const uint8_t *)0) == 0xFF)
+	// {
+	// 	for (uint8_t i = 0; i < EEPROM_DATA_LENGTH; i++)
+	// 	{
+	// 		eeprom_write_byte(((uint8_t *)0) + i, pgm_read_byte(default_eeprom_data + i));
+	// 	}
+	// }
+	// else
+	// {
+	// 	_delay_us(10);
+	// }
+	// OW_RELEASE();
 	// TIM0: overflow and compare A interrupts
 	TIMSK |= _BV(TOIE0) | _BV(OCIE0A);
 	OCR0A = 0;

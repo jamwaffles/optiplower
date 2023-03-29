@@ -89,6 +89,8 @@ static inline void ow_start_timer(void)
 #else
 #error F_CPU should be 1 MHz or 8..9 MHz
 #endif
+
+	sei();
 }
 
 static inline void ow_rx(uint8_t *buffer, uint8_t count, void (*callback)(void))

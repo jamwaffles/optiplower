@@ -9,6 +9,7 @@ AVRDUDE_FLAGS?=-c usbasp -P /dev/ttyUSB0
 AVRDUDE_FLAGS+=-p $(AVRDUDE_MCU)
 
 # FUSES?=-U lfuse:w:0xd2:m -U hfuse:w:0xd7:m -U efuse:w:0xff:m
+FUSES?=-U lfuse:w:0x92:m -U hfuse:w:0xd7:m -U efuse:w:0xff:m
 
 SRC=$(wildcard *.c)
 
@@ -32,5 +33,5 @@ load_rom: $(PROJECT).hex
 load_eeprom: eeprom-data.hex
 	avrdude $(AVRDUDE_FLAGS) -U eeprom:w:$<
 
-# fuses:
-# 	avrdude $(AVRDUDE_FLAGS) $(FUSES)
+fuses:
+	avrdude $(AVRDUDE_FLAGS) $(FUSES)

@@ -25,6 +25,7 @@ References:
 - <https://github.com/timothyjager/DellPSU>
 - <https://www.instructables.com/Embedded-EEPROM-Into-DELL-Laptop-for-Charger-Ident/>
 - <https://github.com/HclX/DELL_POWER_SPOOFER>
+- <https://blog.project-insanity.org/2020/05/25/hardware-fix-for-dell-ac-power-adapter-could-not-be-determined/>
 - Among others
 
 Please use KiCAD 7 to open the board files. The PSU uses JLC/LCSC-sourcable parts if you'd like to
@@ -59,3 +60,12 @@ make load_eeprom
 # Write code
 make load_rom
 ```
+
+## Circuit notes
+
+- Using a DigiSpark module for testing
+- Enable internal pullups on ATTiny85
+- Run ATTiny at 2.7v (lowest allowable for non-`V` chips), otherwise the pin doesn't pull high
+  enough
+- Ensure AVR fuses are written with `cd firmware && make fuses` otherwise EEPROM gets blatted after
+  every flash

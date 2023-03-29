@@ -321,15 +321,12 @@ int main(void)
 {
 	// Calibrate shitty chip clock. Started at 990KHz at 3.3v
 	// Checked with an oscope on PB5 with CLKOUT turned on
-	OSCCAL = 0x77;
+	OSCCAL = 0x75;
 
 	// Disable analog comparator
 	ACSR |= _BV(ACD);
 	// Disable ADC, TIM1 and USI
 	PRR |= _BV(PRADC) | _BV(PRUSI) | _BV(PRTIM1);
-
-	// Disable pullups
-	MCUCR |= _BV(PUD);
 
 	DDRB = 0;
 	PORTB = 0xFF;

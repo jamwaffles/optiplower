@@ -9,7 +9,7 @@
 
 #define EEPROM_DATA_LENGTH 128
 
-static const uint8_t ow_address[8] PROGMEM = { 0x09, 0x52, 0x8D, 0xED, 0x65, 0x00, 0x00, 0xEF };
+static const uint8_t ow_address[8] PROGMEM = {0x09, 0x52, 0x8D, 0xED, 0x65, 0x00, 0x00, 0xEF};
 static const uint8_t default_eeprom_data[EEPROM_DATA_LENGTH] PROGMEM = {
 	'D', 'E', 'L', 'L',																								   // DELL
 	'0', '0', 'A', 'C',																								   // Adapter type
@@ -17,7 +17,7 @@ static const uint8_t default_eeprom_data[EEPROM_DATA_LENGTH] PROGMEM = {
 	'1', '9', '5',																									   // Voltage * 10
 	'0', '2', '3',																									   // Amps * 10
 	'C', 'N', '0', 'C', 'D', 'F', '5', '7', '7', '2', '4', '3', '8', '6', '5', 'Q', '2', '7', 'F', '2', 'A', '0', '5', // Serial number
-	0x3d, 0x94, // CRC
+	0x3d, 0x94,																										   // CRC
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -25,7 +25,8 @@ static const uint8_t default_eeprom_data[EEPROM_DATA_LENGTH] PROGMEM = {
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
-enum {
+enum
+{
 	OW_STATE_IDLE,
 	OW_STATE_RESET,
 	OW_STATE_PRESENCE,
@@ -33,19 +34,22 @@ enum {
 	OW_STATE_TX
 };
 
-enum {
+enum
+{
 	OW_DATA_SOURCE_RAM,
 	OW_DATA_SOURCE_ROM,
 	OW_DATA_SOURCE_EEPROM
 };
 
-static struct {
+static struct
+{
 	uint8_t state;
 	uint8_t bit_state;
 	uint8_t current_byte;
 	uint8_t current_bit;
 	uint8_t current_value;
-	union {
+	union
+	{
 		const uint8_t *tx_buffer;
 		uint8_t *rx_buffer;
 	};
@@ -58,15 +62,25 @@ static struct {
 	uint8_t arg_buffer[8];
 } ow = {
 	.state = OW_STATE_IDLE,
-	.bit_state = 1
-};
+	.bit_state = 1};
 
 #define PIN PB2
 
-#define OW_RELEASE() do { DDRB &= ~_BV(PIN); PORTB |= _BV(PIN); } while (0)
-#define OW_PULL_LOW() do { PORTB &= ~_BV(PIN); DDRB |= _BV(PIN); } while (0)
+#define OW_RELEASE()       \
+	do                     \
+	{                      \
+		DDRB &= ~_BV(PIN); \
+		PORTB |= _BV(PIN); \
+	} while (0)
+#define OW_PULL_LOW()       \
+	do                      \
+	{                       \
+		PORTB &= ~_BV(PIN); \
+		DDRB |= _BV(PIN);   \
+	} while (0)
 
-static inline void ow_start_timer(void) {
+static inline void ow_start_timer(void)
+{
 	TCNT0 = 0;
 #if F_CPU == 1000000
 	TCCR0B = _BV(CS00);
@@ -77,7 +91,8 @@ static inline void ow_start_timer(void) {
 #endif
 }
 
-static inline void ow_rx(uint8_t *buffer, uint8_t count, void (*callback)(void)) {
+static inline void ow_rx(uint8_t *buffer, uint8_t count, void (*callback)(void))
+{
 	ow.state = OW_STATE_RX;
 	ow.rx_buffer = buffer;
 	ow.buffer_size = count;
@@ -87,21 +102,24 @@ static inline void ow_rx(uint8_t *buffer, uint8_t count, void (*callback)(void))
 	ow.current_value = 0;
 }
 
-static inline void ow_fetch_current_byte_from_buffer() {
-	switch (ow.buffer_source) {
-		case OW_DATA_SOURCE_RAM:
-			ow.current_value = ow.tx_buffer[ow.current_byte];
-			break;
-		case OW_DATA_SOURCE_ROM:
-			ow.current_value = pgm_read_byte(ow.tx_buffer + ow.current_byte);
-			break;
-		case OW_DATA_SOURCE_EEPROM:
-			ow.current_value = eeprom_read_byte(ow.tx_buffer + ow.current_byte);
-			break;
+static inline void ow_fetch_current_byte_from_buffer()
+{
+	switch (ow.buffer_source)
+	{
+	case OW_DATA_SOURCE_RAM:
+		ow.current_value = ow.tx_buffer[ow.current_byte];
+		break;
+	case OW_DATA_SOURCE_ROM:
+		ow.current_value = pgm_read_byte(ow.tx_buffer + ow.current_byte);
+		break;
+	case OW_DATA_SOURCE_EEPROM:
+		ow.current_value = eeprom_read_byte(ow.tx_buffer + ow.current_byte);
+		break;
 	}
 }
 
-static inline void ow_tx(const uint8_t *buffer, uint8_t count, uint8_t source, void (*callback)(void)) {
+static inline void ow_tx(const uint8_t *buffer, uint8_t count, uint8_t source, void (*callback)(void))
+{
 	ow.state = OW_STATE_TX;
 	ow.tx_buffer = buffer;
 	ow.buffer_size = count;
@@ -113,131 +131,162 @@ static inline void ow_tx(const uint8_t *buffer, uint8_t count, uint8_t source, v
 	ow.pull_low_next = !(ow.current_value & 1);
 }
 
-static void ow_read_real_mem(void) {
-	uint16_t offset = (((uint16_t) ow.arg_buffer[1]) << 8) | ow.arg_buffer[0];
+static void ow_read_real_mem(void)
+{
+	uint16_t offset = (((uint16_t)ow.arg_buffer[1]) << 8) | ow.arg_buffer[0];
 	uint8_t max_len = EEPROM_DATA_LENGTH - offset;
-	const uint8_t *base = (const uint8_t*) offset;
+	const uint8_t *base = (const uint8_t *)offset;
 	ow_tx(base, max_len, OW_DATA_SOURCE_EEPROM, NULL);
 }
 
-static void ow_read_mem(void) {
-	uint8_t tmp[] = { ow.command, ow.arg_buffer[0], ow.arg_buffer[1] };
+static void ow_read_mem(void)
+{
+	uint8_t tmp[] = {ow.command, ow.arg_buffer[0], ow.arg_buffer[1]};
 	ow.arg_buffer[2] = Crc8(tmp, sizeof(tmp));
 	ow_tx(ow.arg_buffer + 2, 1, OW_DATA_SOURCE_RAM, ow_read_real_mem);
 }
 
-static void ow_write_real_mem(void) {
-	uint16_t offset = (((uint16_t) ow.arg_buffer[1]) << 8) | ow.arg_buffer[0];
+static void ow_write_real_mem(void)
+{
+	uint16_t offset = (((uint16_t)ow.arg_buffer[1]) << 8) | ow.arg_buffer[0];
 	uint8_t data = ow.arg_buffer[2];
-	uint8_t *base = (uint8_t*) offset;
+	uint8_t *base = (uint8_t *)offset;
 	eeprom_write_byte(base, data);
 }
 
-static void ow_write_mem(void) {
-	uint8_t tmp[] = { ow.command, ow.arg_buffer[0], ow.arg_buffer[1], ow.arg_buffer[2] };
+static void ow_write_mem(void)
+{
+	uint8_t tmp[] = {ow.command, ow.arg_buffer[0], ow.arg_buffer[1], ow.arg_buffer[2]};
 	ow.arg_buffer[3] = Crc8(tmp, sizeof(tmp));
 	ow_tx(ow.arg_buffer + 2, 1, OW_DATA_SOURCE_RAM, ow_write_real_mem);
 }
 
-static void ow_command_received(void) {
-	switch (ow.command) {
-		case 0x33: // READ ROM
-			ow_tx(ow_address, 8, OW_DATA_SOURCE_ROM, NULL);
-			break;
-		case 0xCC: // SKIP ROM
-			ow.selected = 1;
-			ow_rx(&(ow.command), sizeof(ow.command), ow_command_received);
-			break;
-		case 0xF0: // READ MEM
-			if (ow.selected) {
-				ow_rx(ow.arg_buffer, 2, ow_read_mem);
-			}
-			break;
-		case 0x0F: // WRITE MEM
-			if (ow.selected) {
-				ow_rx(ow.arg_buffer, 3, ow_write_mem);
-			}
+static void ow_command_received(void)
+{
+	switch (ow.command)
+	{
+	case 0x33: // READ ROM
+		ow_tx(ow_address, 8, OW_DATA_SOURCE_ROM, NULL);
+		break;
+	case 0xCC: // SKIP ROM
+		ow.selected = 1;
+		ow_rx(&(ow.command), sizeof(ow.command), ow_command_received);
+		break;
+	case 0xF0: // READ MEM
+		if (ow.selected)
+		{
+			ow_rx(ow.arg_buffer, 2, ow_read_mem);
+		}
+		break;
+	case 0x0F: // WRITE MEM
+		if (ow.selected)
+		{
+			ow_rx(ow.arg_buffer, 3, ow_write_mem);
+		}
 	}
 }
 
-static void ow_bit_change(uint8_t bit) {
-	//bit ? (PORTB |= _BV(PB1)) : (PORTB &= ~_BV(PB1));
-	switch (ow.state) {
-		case OW_STATE_RESET:
-			if (bit) {
-				ow.state = OW_STATE_PRESENCE;
-				OW_PULL_LOW();
-				OCR0A = 200;
+static void ow_bit_change(uint8_t bit)
+{
+	// bit ? (PORTB |= _BV(PB1)) : (PORTB &= ~_BV(PB1));
+	switch (ow.state)
+	{
+	case OW_STATE_RESET:
+		if (bit)
+		{
+			ow.state = OW_STATE_PRESENCE;
+			OW_PULL_LOW();
+			OCR0A = 200;
+		}
+		break;
+	case OW_STATE_RX:
+		if (!bit)
+		{
+			_delay_us(10);
+			uint8_t cur_bit = ow.current_bit;
+			if (PINB & _BV(PIN))
+			{
+				ow.current_value |= _BV(cur_bit);
 			}
-			break;
-		case OW_STATE_RX:
-			if (!bit) {
-				_delay_us(10);
-				uint8_t cur_bit = ow.current_bit;
-				if (PINB & _BV(PIN)) {
-					ow.current_value |= _BV(cur_bit);
+			cur_bit++;
+			if (cur_bit == 8)
+			{
+				uint8_t cur_byte = ow.current_byte;
+				ow.rx_buffer[cur_byte++] = ow.current_value;
+				ow.current_value = 0;
+				cur_bit = 0;
+				if (cur_byte == ow.buffer_size)
+				{
+					ow.state = OW_STATE_IDLE;
 				}
-				cur_bit++;
-				if (cur_bit == 8) {
-					uint8_t cur_byte = ow.current_byte;
-					ow.rx_buffer[cur_byte++] = ow.current_value;
-					ow.current_value = 0;
-					cur_bit = 0;
-					if (cur_byte == ow.buffer_size) {
-						ow.state = OW_STATE_IDLE;
-					}
+				ow.current_byte = cur_byte;
+			}
+			ow.current_bit = cur_bit;
+			if (ow.state == OW_STATE_IDLE)
+			{
+				if (ow.callback)
+				{
+					ow.callback();
+				}
+			}
+		}
+		break;
+	case OW_STATE_TX:
+		if (!bit)
+		{
+			_delay_us(30);
+			uint8_t cur_bit = ow.current_bit;
+			cur_bit++;
+			if (cur_bit == 8)
+			{
+				uint8_t cur_byte = ow.current_byte;
+				cur_byte++;
+				cur_bit = 0;
+				if (cur_byte == ow.buffer_size)
+				{
+					ow.state = OW_STATE_IDLE;
+				}
+				else
+				{
 					ow.current_byte = cur_byte;
-				}
-				ow.current_bit = cur_bit;
-				if (ow.state == OW_STATE_IDLE) {
-					if (ow.callback) {
-						ow.callback();
-					}
+					ow_fetch_current_byte_from_buffer();
 				}
 			}
-			break;
-		case OW_STATE_TX:
-			if (!bit) {
-				_delay_us(30);
-				uint8_t cur_bit = ow.current_bit;
-				cur_bit++;
-				if (cur_bit == 8) {
-					uint8_t cur_byte = ow.current_byte;
-					cur_byte++;
-					cur_bit = 0;
-					if (cur_byte == ow.buffer_size) {
-						ow.state = OW_STATE_IDLE;
-					} else {
-						ow.current_byte = cur_byte;
-						ow_fetch_current_byte_from_buffer();
-					}
-				}
-				if (ow.state != OW_STATE_IDLE) {
-					ow.pull_low_next = !(ow.current_value & _BV(cur_bit));
-				}
-				ow.current_bit = cur_bit;
-				OW_RELEASE();
-				if (ow.state == OW_STATE_IDLE) {
-					if (ow.callback) {
-						ow.callback();
-					}
+			if (ow.state != OW_STATE_IDLE)
+			{
+				ow.pull_low_next = !(ow.current_value & _BV(cur_bit));
+			}
+			ow.current_bit = cur_bit;
+			OW_RELEASE();
+			if (ow.state == OW_STATE_IDLE)
+			{
+				if (ow.callback)
+				{
+					ow.callback();
 				}
 			}
-			break;
+		}
+		break;
 	}
-	if (!bit) {
+	if (!bit)
+	{
 		ow_start_timer();
-	} else {
+	}
+	else
+	{
 		_delay_us(10);
 	}
 }
 
-ISR(INT0_vect) {
+ISR(INT0_vect)
+{
 	uint8_t bit = ow.bit_state;
-	do {
+	do
+	{
 		GIFR = _BV(INTF0);
 		bit = !bit;
-		if (!bit && ow.pull_low_next) {
+		if (!bit && ow.pull_low_next)
+		{
 			OW_PULL_LOW();
 			ow.pull_low_next = 0;
 		}
@@ -246,25 +295,30 @@ ISR(INT0_vect) {
 	ow.bit_state = (PINB & _BV(PIN)) ? 1 : 0;
 }
 
-ISR(TIMER0_OVF_vect) {
+ISR(TIMER0_OVF_vect)
+{
 	TCCR0B = 0;
 	TIFR = _BV(OCF0A);
-	if (!ow.bit_state) {
+	if (!ow.bit_state)
+	{
 		ow.state = OW_STATE_RESET;
 		ow.selected = 0;
 	}
 }
 
-ISR(TIMER0_COMPA_vect) {
-	switch (ow.state) {
-		case OW_STATE_PRESENCE:
-			OW_RELEASE();
-			ow_rx(&ow.command, sizeof(ow.command), ow_command_received);
-			break;
+ISR(TIMER0_COMPA_vect)
+{
+	switch (ow.state)
+	{
+	case OW_STATE_PRESENCE:
+		OW_RELEASE();
+		ow_rx(&ow.command, sizeof(ow.command), ow_command_received);
+		break;
 	}
 }
 
-int main(void) {
+int main(void)
+{
 	// Calibrate shitty chip clock. Started at 990KHz at 3.3v
 	// Checked with an oscope on PB5 with CLKOUT turned on
 	OSCCAL = 0x77;
@@ -280,12 +334,16 @@ int main(void) {
 	DDRB = 0;
 	PORTB = 0xFF;
 	// Check EEPROM and load default values if needed
-	OW_PULL_LOW();	
-	if (eeprom_read_byte((const uint8_t*) 0) == 0xFF) {
-		for (uint8_t i = 0; i < EEPROM_DATA_LENGTH; i++) {
-			eeprom_write_byte(((uint8_t*) 0) + i, pgm_read_byte(default_eeprom_data + i));
+	OW_PULL_LOW();
+	if (eeprom_read_byte((const uint8_t *)0) == 0xFF)
+	{
+		for (uint8_t i = 0; i < EEPROM_DATA_LENGTH; i++)
+		{
+			eeprom_write_byte(((uint8_t *)0) + i, pgm_read_byte(default_eeprom_data + i));
 		}
-	} else {
+	}
+	else
+	{
 		_delay_us(10);
 	}
 	OW_RELEASE();
@@ -302,9 +360,9 @@ int main(void) {
 	sei();
 	// Main loop
 	set_sleep_mode(SLEEP_MODE_IDLE);
-	while (1) {
+	while (1)
+	{
 		sleep_bod_disable();
 		sleep_mode();
 	}
 }
-

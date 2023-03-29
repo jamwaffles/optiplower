@@ -265,6 +265,10 @@ ISR(TIMER0_COMPA_vect) {
 }
 
 int main(void) {
+	// Calibrate shitty chip clock. Started at 990KHz at 3.3v
+	// Checked with an oscope on PB5 with CLKOUT turned on
+	OSCCAL = 0x77;
+
 	// Disable analog comparator
 	ACSR |= _BV(ACD);
 	// Disable ADC, TIM1 and USI

@@ -14,23 +14,15 @@ OneWireHub::OneWireHub(const uint8_t pin)
     od_mode = false;
 #endif
 
-    for (uint8_t i = 0; i < ONEWIRESLAVE_LIMIT; ++i) { slave_list[i] = nullptr; }
+    slave_list[0] = nullptr;
 
     // prepare pin
-    pin_bitMask = PIN_TO_BITMASK(pin);
-    pin_baseReg = PIN_TO_BASEREG(pin);
+    pin_bitMask   = PIN_TO_BITMASK(pin);
+    pin_baseReg   = PIN_TO_BASEREG(pin);
     pinMode(pin,
             INPUT); // first port-access should by done by this FN, does more than DIRECT_MODE_....
     DIRECT_WRITE_LOW(pin_baseReg, pin_bitMask);
 
-    // prepare debug:
-    if (USE_GPIO_DEBUG)
-    {
-        debug_bitMask = PIN_TO_BITMASK(GPIO_DEBUG_PIN);
-        debug_baseReg = PIN_TO_BASEREG(GPIO_DEBUG_PIN);
-        pinMode(GPIO_DEBUG_PIN, OUTPUT);
-        DIRECT_WRITE_LOW(debug_baseReg, debug_bitMask);
-    }
 
     static_assert(VALUE_IPL, "Your architecture has not been calibrated yet, please run "
                              "examples/debug/calibrate_by_bus_timing and report instructions per "
@@ -44,67 +36,11 @@ OneWireHub::OneWireHub(const uint8_t pin)
 // attach a sensor to the hub
 uint8_t OneWireHub::attach(OneWireItem &sensor)
 {
-    if (slave_count >= ONEWIRESLAVE_LIMIT) return 255; // hub is full
 
-    // demonstrate an 1ms-Low-State on the debug pin (only if bus stays high during this time)
-    // done here because this FN is always called before hub is used
-    if (USE_GPIO_DEBUG)
-    {
-        static bool calibrate_loop_timing = true;
-        if (calibrate_loop_timing)
-        {
-            calibrate_loop_timing = false;
-            waitLoops1ms();
-        }
-    }
-
-    // find position of next free storage-position
-    uint8_t position = 255;
-    for (uint8_t i = 0; i < ONEWIRESLAVE_LIMIT; ++i)
-    {
-        // check for already attached sensors
-        if (slave_list[i] == &sensor) { return i; }
-        // store position of first empty space
-        if ((position > ONEWIRESLAVE_LIMIT) && (slave_list[i] == nullptr)) { position = i; }
-    }
-
-    if (position == 255) return 255;
-
-    slave_list[position] = &sensor;
+    slave_list[0] = &sensor;
     slave_count++;
     buildIDTree();
-    return position;
-}
-
-bool OneWireHub::detach(const OneWireItem &sensor)
-{
-    // find position of sensor
-    uint8_t position = 255;
-    for (uint8_t i = 0; i < ONEWIRESLAVE_LIMIT; ++i)
-    {
-        if (slave_list[i] == &sensor)
-        {
-            position = i;
-            break;
-        }
-    }
-
-    if (position != 255) return detach(position);
-
-    return false;
-}
-
-bool OneWireHub::detach(const uint8_t slave_number)
-{
-    if (slave_list[slave_number] == nullptr) return false;
-    if (slave_count == 0) return false;
-    if (slave_number >= ONEWIRESLAVE_LIMIT) return false;
-
-    slave_list[slave_number] = nullptr;
-    slave_count--;
-    buildIDTree();
-
-    return true;
+    return 0;
 }
 
 
@@ -412,12 +348,11 @@ void OneWireHub::searchIDTree(void)
 
 bool OneWireHub::recvAndProcessCmd(void)
 {
+    slave_selected = slave_list[0];
 
     // If the only slave is not multidrop compatible, pass all data handling to the slave
     if (slave_count == 1u)
     {
-
-        slave_selected = slave_list[getIndexOfNextSensorInList()];
         // TODO: this might be expensive for weak uC and OW in Overdrive and only one device emulated
         //  -> look into optimizations (i.e. preselect when only one device present?)
 
@@ -439,71 +374,6 @@ bool OneWireHub::recvAndProcessCmd(void)
 
     switch (cmd)
     {
-        case 0xF0: // Search rom
-
-            slave_selected = nullptr;
-            noInterrupts();
-            searchIDTree();
-            interrupts();
-
-            // most ICs allow going for duty() right after search
-            if ((_error == Error::NO_ERROR) && (slave_selected != nullptr) &&
-                slave_selected->fast_search_rom)
-            {
-                slave_selected->duty(this);
-            }
-
-            return false; // always trigger a re-init after searchIDTree
-
-        case 0x69: // overdrive MATCH ROM
-
-#if OVERDRIVE_ENABLE
-            od_mode = true;
-            waitLoopsWhilePinIs(ONEWIRE_TIME_READ_MAX[0], false);
-#endif
-
-        case 0x55: // MATCH ROM - Choose/Select ROM
-
-            slave_selected = nullptr;
-
-            if (recv(address, 8)) { break; }
-
-            for (uint8_t i = 0; i < ONEWIRESLAVE_LIMIT; ++i)
-            {
-                if (slave_list[i] == nullptr) continue;
-
-                flag = true;
-                for (uint8_t j = 0; j < 8; ++j)
-                {
-                    if (slave_list[i]->ID[j] != address[j])
-                    {
-                        flag = false;
-                        break;
-                    }
-                }
-
-                if (flag)
-                {
-                    slave_selected = slave_list[i];
-                    break;
-                }
-            }
-
-            if (!flag) { return true; }
-
-            if (slave_selected != nullptr)
-            {
-                if (USE_GPIO_DEBUG) DIRECT_WRITE_HIGH(debug_baseReg, debug_bitMask);
-                slave_selected->duty(this);
-            }
-            break;
-
-        case 0x3C: // overdrive SKIP ROM
-
-#if OVERDRIVE_ENABLE
-            od_mode = true;
-            waitLoopsWhilePinIs(ONEWIRE_TIME_READ_MAX[0], false);
-#endif
         case 0xCC: // SKIP ROM
 
             // NOTE: If more than one slave is present on the bus,
@@ -511,49 +381,13 @@ bool OneWireHub::recvAndProcessCmd(void)
             // data collision will occur on the bus as multiple slaves transmit simultaneously
             if ((slave_selected == nullptr) && (slave_count == 1))
             {
-                slave_selected = slave_list[getIndexOfNextSensorInList()];
+                slave_selected = slave_list[0];
             }
             if (slave_selected != nullptr)
             {
                 if (USE_GPIO_DEBUG) DIRECT_WRITE_HIGH(debug_baseReg, debug_bitMask);
                 slave_selected->duty(this);
             }
-            break;
-
-        case 0x0F: // OLD READ ROM
-
-            // only usable when there is ONE slave on the bus --> continue to current readRom
-
-        case 0x33: // READ ROM
-
-            // only usable when there is ONE slave on the bus
-            if ((slave_selected == nullptr) && (slave_count == 1))
-            {
-                slave_selected = slave_list[getIndexOfNextSensorInList()];
-            }
-            if (slave_selected != nullptr)
-            {
-                slave_selected->sendID(this);
-
-                // most ICs allow to go to duty() without reset
-                if ((_error == Error::NO_ERROR) && slave_selected->fast_read_rom)
-                {
-                    slave_selected->duty(this);
-                }
-            }
-            return false;
-
-        case 0xEC: // ALARM SEARCH
-
-            // TODO: Alarm searchIDTree command, respond if flag is set
-            // is like searchIDTree-rom, but only slaves with triggered alarm will appear
-            break;
-
-        case 0xA5: // RESUME COMMAND
-
-            if (slave_selected == nullptr) return true;
-            if (USE_GPIO_DEBUG) DIRECT_WRITE_HIGH(debug_baseReg, debug_bitMask);
-            slave_selected->duty(this);
             break;
 
         default: // Unknown command

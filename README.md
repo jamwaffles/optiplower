@@ -69,3 +69,27 @@ make load_rom
   enough
 - Ensure AVR fuses are written with `cd firmware && make fuses` otherwise EEPROM gets blatted after
   every flash
+
+---
+
+# A different attempt, this time with Arduino
+
+- <https://github.com/orgua/OneWireHub> for OneWire peripheral impl
+- Needs ATTiny arduino cores from <https://github.com/damellis/attiny>
+
+## Burning bootloader issues
+
+Arduino IDE 2.x, "burn bootloader" with usbasp programmer selected.
+
+Need to swap out programmer for the one on the system or various lib versions won't match, e.g.
+
+```
+error while loading shared libraries: libtinfo.so.5: cannot open shared object file: No such file or directory
+```
+
+E.g.
+
+```bash
+mv /home/james/.arduino15/packages/arduino/tools/avrdude/6.0.1-arduino5/bin/avrdude /home/james/.arduino15/packages/arduino/tools/avrdude/6.0.1-arduino5/bin/avrdude_old
+ln -s $(which avrdude) /home/james/.arduino15/packages/arduino/tools/avrdude/6.0.1-arduino5/bin/avrdude
+```

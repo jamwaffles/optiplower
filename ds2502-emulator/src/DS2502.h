@@ -10,8 +10,8 @@
 class DS2502 : public OneWireItem
 {
 private:
-    static constexpr uint8_t PAGE_COUNT{2};
-    static constexpr uint8_t PAGE_SIZE{32}; // bytes
+    static constexpr uint8_t PAGE_COUNT{1};
+    static constexpr uint8_t PAGE_SIZE{44}; // bytes
     static constexpr uint8_t PAGE_MASK{PAGE_SIZE - 1};
 
     static constexpr uint8_t MEM_SIZE{PAGE_COUNT * PAGE_SIZE}; // bytes

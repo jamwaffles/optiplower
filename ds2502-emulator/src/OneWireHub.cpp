@@ -269,9 +269,6 @@ bool OneWireHub::showPresence(void)
     // Master will delay it's "Presence" check (bus-read)  after the reset
     waitLoopsWhilePinIs(ONEWIRE_TIME_PRESENCE_TIMEOUT, true); // no pinCheck demanded, but this additional check can cut waitTime
 
-    if (USE_GPIO_DEBUG)
-        DIRECT_WRITE_HIGH(debug_baseReg, debug_bitMask);
-
     // pull the bus low and hold it some time
     DIRECT_WRITE_LOW(pin_baseReg, pin_bitMask);
     DIRECT_MODE_OUTPUT(pin_baseReg, pin_bitMask); // drive output low
@@ -279,9 +276,6 @@ bool OneWireHub::showPresence(void)
     wait(ONEWIRE_TIME_PRESENCE_MIN[od_mode]); // stays till the end, because it drives the bus low itself
 
     DIRECT_MODE_INPUT(pin_baseReg, pin_bitMask); // allow it to float
-
-    if (USE_GPIO_DEBUG)
-        DIRECT_WRITE_LOW(debug_baseReg, debug_bitMask);
 
     // When the master or other slaves release the bus within a given time everything is fine
     if (waitLoopsWhilePinIs((ONEWIRE_TIME_PRESENCE_MAX[od_mode] - ONEWIRE_TIME_PRESENCE_MIN[od_mode]), false) == 0)
@@ -414,8 +408,6 @@ bool OneWireHub::recvAndProcessCmd(void)
         }
         if (slave_selected != nullptr)
         {
-            if (USE_GPIO_DEBUG)
-                DIRECT_WRITE_HIGH(debug_baseReg, debug_bitMask);
             slave_selected->duty(this);
         }
         break;
@@ -521,11 +513,6 @@ bool OneWireHub::send(const uint8_t address[], const uint8_t data_length)
                 return true;
             }
         }
-        if (USE_GPIO_DEBUG)
-        {
-            DIRECT_WRITE_HIGH(debug_baseReg, debug_bitMask);
-            DIRECT_WRITE_LOW(debug_baseReg, debug_bitMask);
-        }
     }
     interrupts();
     return (bytes_sent != data_length);
@@ -557,11 +544,6 @@ bool OneWireHub::send(const uint8_t address[], const uint8_t data_length, uint16
             if (mix != 0)
                 crc16 ^= static_cast<uint16_t>(0xA001);
             dataByte >>= 1;
-        }
-        if (USE_GPIO_DEBUG)
-        {
-            DIRECT_WRITE_HIGH(debug_baseReg, debug_bitMask);
-            DIRECT_WRITE_LOW(debug_baseReg, debug_bitMask);
         }
     }
     interrupts();
@@ -629,12 +611,6 @@ bool OneWireHub::recv(uint8_t address[], const uint8_t data_length)
         }
 
         address[bytes_received] = value;
-
-        if (USE_GPIO_DEBUG)
-        {
-            DIRECT_WRITE_HIGH(debug_baseReg, debug_bitMask);
-            DIRECT_WRITE_LOW(debug_baseReg, debug_bitMask);
-        }
     }
 
     interrupts();
@@ -678,11 +654,6 @@ bool OneWireHub::recv(uint8_t address[], const uint8_t data_length, uint16_t &cr
         }
 
         address[bytes_received] = value;
-        if (USE_GPIO_DEBUG)
-        {
-            DIRECT_WRITE_HIGH(debug_baseReg, debug_bitMask);
-            DIRECT_WRITE_LOW(debug_baseReg, debug_bitMask);
-        }
     }
 
     interrupts();
@@ -723,19 +694,7 @@ timeOW_t OneWireHub::waitLoopsWhilePinIs(volatile timeOW_t retries, const bool p
 
 void OneWireHub::waitLoops1ms(void)
 {
-    if (USE_GPIO_DEBUG)
-    {
-        constexpr timeOW_t loops_1ms = 1000_us;
-        timeOW_t loops_left = 1;
-        while (loops_left != 0)
-        {
-            waitLoopsWhilePinIs(loops_1ms, false);
-            DIRECT_MODE_INPUT(pin_baseReg, pin_bitMask);
-            DIRECT_WRITE_HIGH(debug_baseReg, debug_bitMask);
-            loops_left = waitLoopsWhilePinIs(loops_1ms, true);
-            DIRECT_WRITE_LOW(debug_baseReg, debug_bitMask);
-        }
-    }
+    //
 }
 
 // this calibration calibrates timing with the longest low-state on the OW-Bus.

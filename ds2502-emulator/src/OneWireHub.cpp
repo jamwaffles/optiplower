@@ -388,20 +388,20 @@ bool OneWireHub::recvAndProcessCmd(void)
 
     switch (cmd)
     {
-    case 0xF0: // Search rom
+        // case 0xF0: // Search rom
 
-        slave_selected = nullptr;
-        noInterrupts();
-        searchIDTree();
-        interrupts();
+        //     slave_selected = nullptr;
+        //     noInterrupts();
+        //     searchIDTree();
+        //     interrupts();
 
-        // most ICs allow going for duty() right after search
-        if ((_error == Error::NO_ERROR) && (slave_selected != nullptr) && slave_selected->fast_search_rom)
-        {
-            slave_selected->duty(this);
-        }
+        //     // most ICs allow going for duty() right after search
+        //     if ((_error == Error::NO_ERROR) && (slave_selected != nullptr) && slave_selected->fast_search_rom)
+        //     {
+        //         slave_selected->duty(this);
+        //     }
 
-        return false; // always trigger a re-init after searchIDTree
+        //     return false; // always trigger a re-init after searchIDTree
 
     case 0xCC: // SKIP ROM
 
@@ -424,24 +424,24 @@ bool OneWireHub::recvAndProcessCmd(void)
 
         // only usable when there is ONE slave on the bus --> continue to current readRom
 
-    case 0x33: // READ ROM
+        // case 0x33: // READ ROM
 
-        // only usable when there is ONE slave on the bus
-        if ((slave_selected == nullptr) && (slave_count == 1))
-        {
-            slave_selected = slave_list[0];
-        }
-        if (slave_selected != nullptr)
-        {
-            slave_selected->sendID(this);
+        //     // only usable when there is ONE slave on the bus
+        //     if ((slave_selected == nullptr) && (slave_count == 1))
+        //     {
+        //         slave_selected = slave_list[0];
+        //     }
+        //     if (slave_selected != nullptr)
+        //     {
+        //         slave_selected->sendID(this);
 
-            // most ICs allow to go to duty() without reset
-            if ((_error == Error::NO_ERROR) && slave_selected->fast_read_rom)
-            {
-                slave_selected->duty(this);
-            }
-        }
-        return false;
+        //         // most ICs allow to go to duty() without reset
+        //         if ((_error == Error::NO_ERROR) && slave_selected->fast_read_rom)
+        //         {
+        //             slave_selected->duty(this);
+        //         }
+        //     }
+        //     return false;
 
     default: // Unknown command
 

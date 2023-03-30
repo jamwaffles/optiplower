@@ -403,63 +403,6 @@ bool OneWireHub::recvAndProcessCmd(void)
 
         return false; // always trigger a re-init after searchIDTree
 
-    case 0x69: // overdrive MATCH ROM
-
-#if OVERDRIVE_ENABLE
-        od_mode = true;
-        waitLoopsWhilePinIs(ONEWIRE_TIME_READ_MAX[0], false);
-#endif
-
-    case 0x55: // MATCH ROM - Choose/Select ROM
-
-        slave_selected = nullptr;
-
-        if (recv(address, 8))
-        {
-            break;
-        }
-
-        for (uint8_t i = 0; i < ONEWIRESLAVE_LIMIT; ++i)
-        {
-            if (slave_list[i] == nullptr)
-                continue;
-
-            flag = true;
-            for (uint8_t j = 0; j < 8; ++j)
-            {
-                if (slave_list[i]->ID[j] != address[j])
-                {
-                    flag = false;
-                    break;
-                }
-            }
-
-            if (flag)
-            {
-                slave_selected = slave_list[i];
-                break;
-            }
-        }
-
-        if (!flag)
-        {
-            return true;
-        }
-
-        if (slave_selected != nullptr)
-        {
-            if (USE_GPIO_DEBUG)
-                DIRECT_WRITE_HIGH(debug_baseReg, debug_bitMask);
-            slave_selected->duty(this);
-        }
-        break;
-
-    case 0x3C: // overdrive SKIP ROM
-
-#if OVERDRIVE_ENABLE
-        od_mode = true;
-        waitLoopsWhilePinIs(ONEWIRE_TIME_READ_MAX[0], false);
-#endif
     case 0xCC: // SKIP ROM
 
         // NOTE: If more than one slave is present on the bus,
@@ -499,21 +442,6 @@ bool OneWireHub::recvAndProcessCmd(void)
             }
         }
         return false;
-
-    case 0xEC: // ALARM SEARCH
-
-        // TODO: Alarm searchIDTree command, respond if flag is set
-        // is like searchIDTree-rom, but only slaves with triggered alarm will appear
-        break;
-
-    case 0xA5: // RESUME COMMAND
-
-        if (slave_selected == nullptr)
-            return true;
-        if (USE_GPIO_DEBUG)
-            DIRECT_WRITE_HIGH(debug_baseReg, debug_bitMask);
-        slave_selected->duty(this);
-        break;
 
     default: // Unknown command
 

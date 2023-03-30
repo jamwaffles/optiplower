@@ -94,56 +94,6 @@ void DS2502::duty(OneWireHub *const hub)
         hub->send(&crc);
         break; // datasheet says we should return all 1s, send(255), till reset, nothing to do here, 1s are passive
 
-    case 0x0F: // WRITE MEMORY
-
-        while (reg_TA[0] < sizeof_memory)
-        {
-            if (hub->recv(&data))
-                break;
-            crc = crc8(&data, 1, crc);
-
-            if (hub->send(&crc))
-                break;
-
-            const uint8_t reg_RA = translateRedirection(reg_TA[0]);
-            const uint8_t page = static_cast<uint8_t>(reg_RA >> 5);
-            if (getPageProtection(page))
-            {
-                const uint8_t mem_zero = 0x00; // send dummy data
-                if (hub->send(&mem_zero))
-                    break;
-            }
-            else
-            {
-                memory[reg_RA] &= data; // EPROM-Mode
-                setPageUsed(reg_RA);
-                if (hub->send(&memory[reg_RA]))
-                    break;
-            }
-            crc = ++reg_TA[0];
-        }
-        break;
-
-    case 0x55: // WRITE STATUS
-
-        while (reg_TA[0] < STATUS_SIZE)
-        {
-            if (hub->recv(&data))
-                break;
-            crc = crc8(&data, 1, crc);
-
-            if (hub->send(&crc))
-                break;
-
-            data = writeStatus(reg_TA[0], data);
-
-            if (hub->send(&data))
-                break;
-
-            crc = ++reg_TA[0];
-        }
-        break;
-
     default:
 
         hub->raiseSlaveError(cmd);

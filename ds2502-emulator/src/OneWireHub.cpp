@@ -78,17 +78,6 @@ uint8_t OneWireHub::getNrOfFirstBitSet(const mask_t mask) const
     return 0;
 }
 
-// return next not empty element in slave-list
-uint8_t OneWireHub::getIndexOfNextSensorInList(const uint8_t index_start) const
-{
-    for (uint8_t i = index_start; i < ONEWIRE_TREE_SIZE; ++i)
-    {
-        if (slave_list[i] != nullptr)
-            return i;
-    }
-    return 0;
-}
-
 // gone through the address, store this result
 uint8_t OneWireHub::getNrOfFirstFreeIDTreeElement(void) const
 {
@@ -376,7 +365,7 @@ bool OneWireHub::recvAndProcessCmd(void)
     if (slave_count == 1u)
     {
 
-        slave_selected = slave_list[getIndexOfNextSensorInList()];
+        slave_selected = slave_list[0];
         // TODO: this might be expensive for weak uC and OW in Overdrive and only one device emulated
         //  -> look into optimizations (i.e. preselect when only one device present?)
 
@@ -478,7 +467,7 @@ bool OneWireHub::recvAndProcessCmd(void)
         // data collision will occur on the bus as multiple slaves transmit simultaneously
         if ((slave_selected == nullptr) && (slave_count == 1))
         {
-            slave_selected = slave_list[getIndexOfNextSensorInList()];
+            slave_selected = slave_list[0];
         }
         if (slave_selected != nullptr)
         {
@@ -497,7 +486,7 @@ bool OneWireHub::recvAndProcessCmd(void)
         // only usable when there is ONE slave on the bus
         if ((slave_selected == nullptr) && (slave_count == 1))
         {
-            slave_selected = slave_list[getIndexOfNextSensorInList()];
+            slave_selected = slave_list[0];
         }
         if (slave_selected != nullptr)
         {

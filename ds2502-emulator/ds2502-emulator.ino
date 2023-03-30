@@ -24,12 +24,12 @@
  */
 
 // Local, gutted library in an attempt to make it work on ATTiny25
-// #include "src/OneWireHub/src/OneWireHub.h"
-// #include "src/OneWireHub/src/DS2502.h"
+#include "src/OneWireHub.h"
+#include "src/DS2502.h"
 
 // Full library which works on 85/45 but not 25
-#include "OneWireHub.h"
-#include "DS2502.h"
+// #include "OneWireHub.h"
+// #include "DS2502.h"
 
 // Using GPIO2 on an ESP01 module (Requires 10k pull-up to 3.3V)
 constexpr uint8_t pin_onewire{2};

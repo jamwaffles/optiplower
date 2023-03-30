@@ -56,43 +56,43 @@ void DS2502::duty(OneWireHub *const hub)
         hub->send(&crc);
         break; // datasheet says we should return all 1s, send(255), till reset, nothing to do here, 1s are passive
 
-    case 0xC3: // READ DATA (like 0xF0, but repeatedly till the end of page with following CRC)
+        // case 0xC3: // READ DATA (like 0xF0, but repeatedly till the end of page with following CRC)
 
-        if (hub->send(&crc))
-            break;
+        //     if (hub->send(&crc))
+        //         break;
 
-        while (reg_TA[0] < sizeof_memory)
-        {
-            crc = 0;                                                     // reInit CRC and send data
-            const uint8_t reg_EA = (reg_TA[0] & ~PAGE_MASK) + PAGE_SIZE; // End Address
-            for (uint8_t i = reg_TA[0]; i < reg_EA; ++i)
-            {
-                const uint8_t reg_RA = translateRedirection(i);
-                if (hub->send(&memory[reg_RA]))
-                    return;
-                crc = crc8(&memory[reg_RA], 1, crc);
-            }
+        //     while (reg_TA[0] < sizeof_memory)
+        //     {
+        //         crc = 0;                                                     // reInit CRC and send data
+        //         const uint8_t reg_EA = (reg_TA[0] & ~PAGE_MASK) + PAGE_SIZE; // End Address
+        //         for (uint8_t i = reg_TA[0]; i < reg_EA; ++i)
+        //         {
+        //             const uint8_t reg_RA = translateRedirection(i);
+        //             if (hub->send(&memory[reg_RA]))
+        //                 return;
+        //             crc = crc8(&memory[reg_RA], 1, crc);
+        //         }
 
-            if (hub->send(&crc))
-                break;
-            reg_TA[0] = reg_EA;
-        }
-        break; // datasheet says we should return all 1s, send(255), till reset, nothing to do here, 1s are passive
+        //         if (hub->send(&crc))
+        //             break;
+        //         reg_TA[0] = reg_EA;
+        //     }
+        //     break; // datasheet says we should return all 1s, send(255), till reset, nothing to do here, 1s are passive
 
-    case 0xAA: // READ STATUS // TODO: nearly same code as 0xF0, but with status[] instead of memory[]
+        // case 0xAA: // READ STATUS // TODO: nearly same code as 0xF0, but with status[] instead of memory[]
 
-        if (hub->send(&crc))
-            break;
+        //     if (hub->send(&crc))
+        //         break;
 
-        crc = 0; // reInit CRC and send data
-        for (uint8_t i = reg_TA[0]; i < STATUS_SIZE; ++i)
-        {
-            if (hub->send(&status[i]))
-                return;
-            crc = crc8(&status[i], 1, crc);
-        }
-        hub->send(&crc);
-        break; // datasheet says we should return all 1s, send(255), till reset, nothing to do here, 1s are passive
+        //     crc = 0; // reInit CRC and send data
+        //     for (uint8_t i = reg_TA[0]; i < STATUS_SIZE; ++i)
+        //     {
+        //         if (hub->send(&status[i]))
+        //             return;
+        //         crc = crc8(&status[i], 1, crc);
+        //     }
+        //     hub->send(&crc);
+        //     break; // datasheet says we should return all 1s, send(255), till reset, nothing to do here, 1s are passive
 
     default:
 

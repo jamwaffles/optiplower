@@ -33,11 +33,11 @@ constexpr uint8_t pin_onewire   { 2 };
 constexpr uint8_t chargerStrlen   { 42 };
 // // https://github.com/KivApple/dell-charger-emulator
 // constexpr const char* charger45W = "DELL00AC045195023CN0CDF577243865Q27F2A05\x3D\x94";
-// // https://nickschicht.wordpress.com/2009/07/15/dell-power-supply-fault/
-// constexpr const char* charger65W = "DELL00AC065195033CN05U0927161552F31B8A03\xBC\x8F";
+// https://nickschicht.wordpress.com/2009/07/15/dell-power-supply-fault/
+constexpr const char* charger65W = "DELL00AC065195033CN05U0927161552F31B8A03\xBC\x8F";
 // constexpr const char* charger90W = "DELL00AC090195046CN0C80234866161R23H8A03\x4D\x7C";
 // I made this up, works with Dell Inspiron 15R N5110 and Dell Inspiron 15R 5521
-constexpr const char* charger130W = "DELL00AC130195067CN0CDF577243865Q27F2233\x9D\x72";
+// constexpr const char* charger130W = "DELL00AC130195067CN0CDF577243865Q27F2233\x9D\x72";
 
 auto hub       = OneWireHub(pin_onewire);
 auto dellCH    = DS2502( 0x28, 0x0D, 0x01, 0x08, 0x0B, 0x02, 0x0A); // address does not matter, laptop uses skipRom -> note that therefore only one slave device is allowed on the bus
@@ -50,7 +50,7 @@ void setup()
     // Setup OneWire
     hub.attach(dellCH);
     // Populate the emulated EEPROM with the 42 byte ID string
-    dellCH.writeMemory((uint8_t*)charger130W, chargerStrlen);
+    dellCH.writeMemory((uint8_t*)charger65W, chargerStrlen);
 }
 
 void loop()

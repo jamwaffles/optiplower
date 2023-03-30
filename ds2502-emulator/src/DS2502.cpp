@@ -4,7 +4,7 @@ DS2502::DS2502(uint8_t ID1, uint8_t ID2, uint8_t ID3, uint8_t ID4, uint8_t ID5, 
 {
     static_assert(MEM_SIZE < 256, "Implementation does not cover the whole address-space");
 
-    clearMemory();
+    // clearMemory();
     clearStatus();
 }
 
@@ -91,10 +91,10 @@ uint8_t DS2502::translateRedirection(const uint8_t source_address) const
     return destin_address;
 }
 
-void DS2502::clearMemory(void)
-{
-    memset(memory, static_cast<uint8_t>(0xFF), MEM_SIZE);
-}
+// void DS2502::clearMemory(void)
+// {
+//     memset(memory, static_cast<uint8_t>(0xFF), MEM_SIZE);
+// }
 
 void DS2502::clearStatus(void)
 {
@@ -102,56 +102,56 @@ void DS2502::clearStatus(void)
     status[STATUS_FACTORYP] = 0x00; // last byte should be always zero
 }
 
-bool DS2502::writeMemory(const uint8_t *const source, const uint8_t length, const uint8_t position)
-{
-    if (position >= MEM_SIZE)
-        return false;
-    const uint16_t _length = (position + length >= MEM_SIZE) ? (MEM_SIZE - position) : length;
-    memcpy(&memory[position], source, _length);
+// bool DS2502::writeMemory(const uint8_t *const source, const uint8_t length, const uint8_t position)
+// {
+//     if (position >= MEM_SIZE)
+//         return false;
+//     const uint16_t _length = (position + length >= MEM_SIZE) ? (MEM_SIZE - position) : length;
+//     memcpy(&memory[position], source, _length);
 
-    const uint8_t page_start = static_cast<uint8_t>(position >> 5);
-    const uint8_t page_stop = static_cast<uint8_t>((position + _length) >> 5);
-    for (uint8_t page = page_start; page <= page_stop; page++)
-        setPageUsed(page);
+//     const uint8_t page_start = static_cast<uint8_t>(position >> 5);
+//     const uint8_t page_stop = static_cast<uint8_t>((position + _length) >> 5);
+//     for (uint8_t page = page_start; page <= page_stop; page++)
+//         setPageUsed(page);
 
-    return (_length == length);
-}
+//     return (_length == length);
+// }
 
-bool DS2502::readMemory(uint8_t *const destination, const uint8_t length, const uint8_t position) const
-{
-    if (position >= MEM_SIZE)
-        return false;
-    const uint16_t _length = (position + length >= MEM_SIZE) ? (MEM_SIZE - position) : length;
-    memcpy(destination, &memory[position], _length);
-    return (_length == length);
-}
+// bool DS2502::readMemory(uint8_t *const destination, const uint8_t length, const uint8_t position) const
+// {
+//     if (position >= MEM_SIZE)
+//         return false;
+//     const uint16_t _length = (position + length >= MEM_SIZE) ? (MEM_SIZE - position) : length;
+//     memcpy(destination, &memory[position], _length);
+//     return (_length == length);
+// }
 
-uint8_t DS2502::writeStatus(const uint8_t address, const uint8_t value)
-{
-    if (address < STATUS_UNDEF_B1)
-        status[address] &= value; // writing is allowed only here
-    return status[address];
-}
+// uint8_t DS2502::writeStatus(const uint8_t address, const uint8_t value)
+// {
+//     if (address < STATUS_UNDEF_B1)
+//         status[address] &= value; // writing is allowed only here
+//     return status[address];
+// }
 
-uint8_t DS2502::readStatus(const uint8_t address) const
-{
-    if (address >= STATUS_SIZE)
-        return 0xFF;
-    return status[address];
-}
+// uint8_t DS2502::readStatus(const uint8_t address) const
+// {
+//     if (address >= STATUS_SIZE)
+//         return 0xFF;
+//     return status[address];
+// }
 
-void DS2502::setPageProtection(const uint8_t page)
-{
-    if (page < PAGE_COUNT)
-        status[STATUS_WP_PAGES] &= ~(uint8_t(1 << page));
-}
+// void DS2502::setPageProtection(const uint8_t page)
+// {
+//     if (page < PAGE_COUNT)
+//         status[STATUS_WP_PAGES] &= ~(uint8_t(1 << page));
+// }
 
-bool DS2502::getPageProtection(const uint8_t page) const
-{
-    if (page >= PAGE_COUNT)
-        return true;
-    return ((status[STATUS_WP_PAGES] & uint8_t(1 << page)) == 0);
-}
+// bool DS2502::getPageProtection(const uint8_t page) const
+// {
+//     if (page >= PAGE_COUNT)
+//         return true;
+//     return ((status[STATUS_WP_PAGES] & uint8_t(1 << page)) == 0);
+// }
 
 void DS2502::setPageUsed(const uint8_t page)
 {
@@ -159,12 +159,12 @@ void DS2502::setPageUsed(const uint8_t page)
         status[STATUS_WP_PAGES] &= ~(uint8_t(1 << (page + 4)));
 }
 
-bool DS2502::getPageUsed(const uint8_t page) const
-{
-    if (page >= PAGE_COUNT)
-        return true;
-    return ((status[STATUS_WP_PAGES] & uint8_t(1 << (page + 4))) == 0);
-}
+// bool DS2502::getPageUsed(const uint8_t page) const
+// {
+//     if (page >= PAGE_COUNT)
+//         return true;
+//     return ((status[STATUS_WP_PAGES] & uint8_t(1 << (page + 4))) == 0);
+// }
 
 bool DS2502::setPageRedirection(const uint8_t page_source, const uint8_t page_destin)
 {

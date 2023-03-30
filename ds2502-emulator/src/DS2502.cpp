@@ -93,10 +93,6 @@ void DS2502::duty(OneWireHub *const hub)
         //     }
         //     hub->send(&crc);
         //     break; // datasheet says we should return all 1s, send(255), till reset, nothing to do here, 1s are passive
-
-    default:
-
-        hub->raiseSlaveError(cmd);
     }
 }
 

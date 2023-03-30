@@ -408,7 +408,6 @@ bool OneWireHub::recvAndProcessCmd(void)
     default: // Unknown command
 
         _error = Error::INCORRECT_ONEWIRE_CMD;
-        _error_cmd = cmd;
     }
 
     if (_error == Error::RESET_IN_PROGRESS)
@@ -765,51 +764,7 @@ void OneWireHub::waitLoopsDebug(void) const
 
 void OneWireHub::printError(void) const
 {
-    if (USE_SERIAL_DEBUG)
-    {
-        if (_error == Error::NO_ERROR)
-            return;
-        Serial.print("Error: ");
-        if (_error == Error::READ_TIMESLOT_TIMEOUT)
-            Serial.print("read timeslot timeout");
-        else if (_error == Error::WRITE_TIMESLOT_TIMEOUT)
-            Serial.print("write timeslot timeout");
-        else if (_error == Error::WAIT_RESET_TIMEOUT)
-            Serial.print("reset wait timeout");
-        else if (_error == Error::VERY_LONG_RESET)
-            Serial.print("very long reset");
-        else if (_error == Error::VERY_SHORT_RESET)
-            Serial.print("very short reset");
-        else if (_error == Error::PRESENCE_LOW_ON_LINE)
-            Serial.print("presence low on line");
-        else if (_error == Error::READ_TIMESLOT_TIMEOUT_LOW)
-            Serial.print("read timeout low");
-        else if (_error == Error::AWAIT_TIMESLOT_TIMEOUT_HIGH)
-            Serial.print("await timeout high");
-        else if (_error == Error::PRESENCE_HIGH_ON_LINE)
-            Serial.print("presence high on line");
-        else if (_error == Error::INCORRECT_ONEWIRE_CMD)
-            Serial.print("incorrect onewire command");
-        else if (_error == Error::INCORRECT_SLAVE_USAGE)
-            Serial.print("slave was used in incorrect way");
-        else if (_error == Error::TRIED_INCORRECT_WRITE)
-            Serial.print("tried to write in read-slot");
-        else if (_error == Error::FIRST_TIMESLOT_TIMEOUT)
-            Serial.print("found no timeslot after reset / presence (is OK)");
-        else if (_error == Error::FIRST_BIT_OF_BYTE_TIMEOUT)
-            Serial.print("first bit of byte timeout");
-
-        if ((_error == Error::INCORRECT_ONEWIRE_CMD) || (_error == Error::INCORRECT_SLAVE_USAGE))
-        {
-            Serial.print(" [0x");
-            Serial.print(_error_cmd, HEX);
-            Serial.println("]");
-        }
-        else
-        {
-            Serial.println("");
-        }
-    }
+    //
 }
 
 Error OneWireHub::getError(void) const
@@ -820,12 +775,6 @@ Error OneWireHub::getError(void) const
 bool OneWireHub::hasError(void) const
 {
     return (_error != Error::NO_ERROR);
-}
-
-void OneWireHub::raiseSlaveError(const uint8_t cmd)
-{
-    _error = Error::INCORRECT_SLAVE_USAGE;
-    _error_cmd = cmd;
 }
 
 Error OneWireHub::clearError(void) // and return it if needed

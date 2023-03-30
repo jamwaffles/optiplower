@@ -72,15 +72,9 @@ private:
 #endif
 
     Error _error;
-    uint8_t _error_cmd;
 
     io_reg_t pin_bitMask;
     volatile io_reg_t *pin_baseReg;
-
-#if true // USE_GPIO_DEBUG
-    io_reg_t debug_bitMask;
-    volatile io_reg_t *debug_baseReg;
-#endif
 
     OneWireItem *slave_list; // private slave-list (use attach/detach)
 

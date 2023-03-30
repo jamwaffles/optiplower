@@ -7,7 +7,7 @@
 /////////////////////////////////////////////////////
 
 // INFO: had to go with a define because some compilers use constexpr as simple const --> massive problems
-#define HUB_SLAVE_LIMIT 8  // set the limit of the hub HERE, max is 32 devices
+#define HUB_SLAVE_LIMIT 1  // set the limit of the hub HERE, max is 32 devices
 #define OVERDRIVE_ENABLE 0 // support overdrive for the slaves
 
 constexpr bool USE_SERIAL_DEBUG{false}; // give debug messages when printError() is called (be aware! it may produce heisenbugs, timing is critical) SHOULD NOT be enabled with < 20 MHz uC

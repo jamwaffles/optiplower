@@ -6,21 +6,6 @@ DS2502::DS2502(uint8_t ID1, uint8_t ID2, uint8_t ID3, uint8_t ID4, uint8_t ID5, 
 
     clearMemory();
     clearStatus();
-
-    if ((ID1 == 0x11) || (ID1 == 0x91))
-    {
-        // when set to DS2501, the upper two memory pages are not accessible, always read 0xFF
-        for (uint8_t page = 2; page < PAGE_COUNT; ++page)
-        {
-            setPageUsed(page);
-            setPageProtection(page);
-            sizeof_memory = 64;
-        }
-    }
-    else
-    {
-        sizeof_memory = 128; // must be DS2502 then
-    }
 }
 
 void DS2502::duty(OneWireHub *const hub)

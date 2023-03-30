@@ -24,9 +24,9 @@ private:
     static constexpr uint8_t STATUS_UNDEF_B1{0x05}; // 2 byte -> reserved / undefined
     static constexpr uint8_t STATUS_FACTORYP{0x07}; // 2 byte -> factoryprogrammed 0x00
 
-    uint8_t memory[MEM_SIZE];    // 4 pages of 32 bytes
-    uint8_t status[STATUS_SIZE]; // eprom status bytes:
-    uint8_t sizeof_memory;       // device specific "real" size
+    uint8_t memory[MEM_SIZE];                    // 4 pages of 32 bytes
+    uint8_t status[STATUS_SIZE];                 // eprom status bytes:
+    static constexpr uint8_t sizeof_memory{128}; // device specific "real" size
 
     uint8_t translateRedirection(uint8_t source_address) const;
 

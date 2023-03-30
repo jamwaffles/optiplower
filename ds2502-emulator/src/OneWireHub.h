@@ -83,8 +83,7 @@ private:
 #endif
 
     uint8_t slave_count;
-    OneWireItem *slave_list[ONEWIRESLAVE_LIMIT]; // private slave-list (use attach/detach)
-    OneWireItem *slave_selected;
+    OneWireItem *slave_list; // private slave-list (use attach/detach)
 
     struct IDTree
     {

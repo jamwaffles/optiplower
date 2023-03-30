@@ -8,8 +8,7 @@ OneWireHub::OneWireHub(const uint8_t pin)
     _error = Error::NO_ERROR;
 
     slave_count = 0;
-    slave_selected = nullptr;
-    slave_list[0] = nullptr;
+    slave_list = nullptr;
 
     // prepare pin
     pin_bitMask = PIN_TO_BITMASK(pin);
@@ -24,150 +23,147 @@ OneWireHub::OneWireHub(const uint8_t pin)
 // attach a sensor to the hub
 uint8_t OneWireHub::attach(OneWireItem &sensor)
 {
-    slave_list[0] = &sensor;
+    slave_list = &sensor;
     slave_count = 1;
     return 0;
 }
 
 bool OneWireHub::detach(const OneWireItem &sensor)
 {
-    // find position of sensor
-    uint8_t position = 255;
-    for (uint8_t i = 0; i < ONEWIRESLAVE_LIMIT; ++i)
-    {
-        if (slave_list[i] == &sensor)
-        {
-            position = i;
-            break;
-        }
-    }
+    // // find position of sensor
+    // uint8_t position = 255;
+    // for (uint8_t i = 0; i < ONEWIRESLAVE_LIMIT; ++i)
+    // {
+    //     if (&slave_list == &sensor)
+    //     {
+    //         position = i;
+    //         break;
+    //     }
+    // }
 
-    if (position != 255)
-        return detach(position);
+    // if (position != 255)
+    //     return detach(position);
 
-    return false;
+    // return false;
+    return 0;
 }
 
 bool OneWireHub::detach(const uint8_t slave_number)
 {
-    if (slave_list[slave_number] == nullptr)
-        return false;
-    if (slave_count == 0)
-        return false;
-    if (slave_number >= ONEWIRESLAVE_LIMIT)
+    if (slave_list == nullptr)
         return false;
 
-    slave_list[slave_number] = nullptr;
+    slave_list = nullptr;
     slave_count--;
-    buildIDTree();
+    // buildIDTree();
 
     return true;
 }
 
-// just look through each bit of each ID and build a tree, so there are n=slaveCount decision-points
-// trade-off: more online calculation, but @4Slave 16byte storage instead of 3*256 byte
-uint8_t OneWireHub::getNrOfFirstBitSet(const mask_t mask) const
-{
-    mask_t _mask = mask;
-    for (uint8_t i = 0; i < ONEWIRESLAVE_LIMIT; ++i)
-    {
-        if ((_mask & 1) != 0)
-            return i;
-        _mask >>= 1;
-    }
-    return 0;
-}
+// // just look through each bit of each ID and build a tree, so there are n=slaveCount decision-points
+// // trade-off: more online calculation, but @4Slave 16byte storage instead of 3*256 byte
+// uint8_t OneWireHub::getNrOfFirstBitSet(const mask_t mask) const
+// {
+//     mask_t _mask = mask;
+//     for (uint8_t i = 0; i < ONEWIRESLAVE_LIMIT; ++i)
+//     {
+//         if ((_mask & 1) != 0)
+//             return i;
+//         _mask >>= 1;
+//     }
+//     return 0;
+// }
 
-// gone through the address, store this result
-uint8_t OneWireHub::getNrOfFirstFreeIDTreeElement(void) const
-{
-    for (uint8_t i = 0; i < ONEWIRE_TREE_SIZE; ++i)
-    {
-        if (idTree[i].id_position == 255)
-            return i;
-    }
-    return 0;
-}
+// // gone through the address, store this result
+// uint8_t OneWireHub::getNrOfFirstFreeIDTreeElement(void) const
+// {
+//     for (uint8_t i = 0; i < ONEWIRE_TREE_SIZE; ++i)
+//     {
+//         if (idTree[i].id_position == 255)
+//             return i;
+//     }
+//     return 0;
+// }
 
-// initial FN to build the ID-Tree
-uint8_t OneWireHub::buildIDTree(void)
-{
-    mask_t mask_slaves = 0;
-    mask_t bit_mask = 0x01;
+// // initial FN to build the ID-Tree
+// uint8_t OneWireHub::buildIDTree(void)
+// {
+//     mask_t mask_slaves = 0;
+//     mask_t bit_mask = 0x01;
 
-    // build mask
-    for (uint8_t i = 0; i < ONEWIRESLAVE_LIMIT; ++i)
-    {
-        if (slave_list[i] != nullptr)
-            mask_slaves |= bit_mask;
-        bit_mask <<= 1;
-    }
+//     // build mask
+//     for (uint8_t i = 0; i < ONEWIRESLAVE_LIMIT; ++i)
+//     {
+//         if (slave_list[i] != nullptr)
+//             mask_slaves |= bit_mask;
+//         bit_mask <<= 1;
+//     }
 
-    for (uint8_t i = 0; i < ONEWIRE_TREE_SIZE; ++i)
-    {
-        idTree[i].id_position = 255;
-    }
+//     for (uint8_t i = 0; i < ONEWIRE_TREE_SIZE; ++i)
+//     {
+//         idTree[i].id_position = 255;
+//     }
 
-    // begin with root-element
-    buildIDTree(0, mask_slaves); // goto branch
+//     // begin with root-element
+//     buildIDTree(0, mask_slaves); // goto branch
 
-    return 0;
-}
+//     return 0;
+// }
 
-// returns the branch that this iteration has worked on
-uint8_t OneWireHub::buildIDTree(uint8_t position_IDBit, const mask_t mask_slaves)
-{
-    if (mask_slaves == 0)
-        return (255);
+// // returns the branch that this iteration has worked on
+// uint8_t OneWireHub::buildIDTree(uint8_t position_IDBit, const mask_t mask_slaves)
+// {
+//     if (mask_slaves == 0)
+//         return (255);
 
-    while (position_IDBit < 64)
-    {
-        mask_t mask_pos{0};
-        mask_t mask_neg{0};
-        const uint8_t pos_byte{static_cast<uint8_t>(position_IDBit >> 3)};
-        const uint8_t mask_bit{static_cast<uint8_t>(1 << (position_IDBit & 7))};
-        mask_t mask_id{1};
+//     while (position_IDBit < 64)
+//     {
+//         mask_t mask_pos{0};
+//         mask_t mask_neg{0};
+//         const uint8_t pos_byte{static_cast<uint8_t>(position_IDBit >> 3)};
+//         const uint8_t mask_bit{static_cast<uint8_t>(1 << (position_IDBit & 7))};
+//         mask_t mask_id{1};
 
-        // searchIDTree through all active slaves
-        for (uint8_t id = 0; id < ONEWIRESLAVE_LIMIT; ++id)
-        {
-            if ((mask_slaves & mask_id) != 0)
-            {
-                // if slave is in mask differentiate the bitValue
-                if ((slave_list[id]->ID[pos_byte] & mask_bit) != 0)
-                    mask_pos |= mask_id;
-                else
-                    mask_neg |= mask_id;
-            }
-            mask_id <<= 1;
-        }
+//         // searchIDTree through all active slaves
+//         for (uint8_t id = 0; id < ONEWIRESLAVE_LIMIT; ++id)
+//         {
+//             if ((mask_slaves & mask_id) != 0)
+//             {
+//                 // if slave is in mask differentiate the bitValue
+//                 if ((slave_list[id]->ID[pos_byte] & mask_bit) != 0)
+//                     mask_pos |= mask_id;
+//                 else
+//                     mask_neg |= mask_id;
+//             }
+//             mask_id <<= 1;
+//         }
 
-        if ((mask_neg != 0) && (mask_pos != 0))
-        {
-            // there was found a junction
-            const uint8_t active_element = getNrOfFirstFreeIDTreeElement();
+//         if ((mask_neg != 0) && (mask_pos != 0))
+//         {
+//             // there was found a junction
+//             const uint8_t active_element = getNrOfFirstFreeIDTreeElement();
 
-            idTree[active_element].id_position = position_IDBit;
-            idTree[active_element].slave_selected = getNrOfFirstBitSet(mask_slaves);
-            position_IDBit++;
-            idTree[active_element].got_one = buildIDTree(position_IDBit, mask_pos);
-            idTree[active_element].got_zero = buildIDTree(position_IDBit, mask_neg);
-            return active_element;
-        }
+//             idTree[active_element].id_position = position_IDBit;
+//             idTree[active_element].slave_selected = getNrOfFirstBitSet(mask_slaves);
+//             position_IDBit++;
+//             idTree[active_element].got_one = buildIDTree(position_IDBit, mask_pos);
+//             idTree[active_element].got_zero = buildIDTree(position_IDBit, mask_neg);
+//             return active_element;
+//         }
 
-        position_IDBit++;
-    }
+//         position_IDBit++;
+//     }
 
-    // gone through the address, store this result
-    uint8_t active_element = getNrOfFirstFreeIDTreeElement();
+//     // gone through the address, store this result
+//     uint8_t active_element = getNrOfFirstFreeIDTreeElement();
 
-    idTree[active_element].id_position = 128;
-    idTree[active_element].slave_selected = getNrOfFirstBitSet(mask_slaves);
-    idTree[active_element].got_one = 255;
-    idTree[active_element].got_zero = 255;
+//     idTree[active_element].id_position = 128;
+//     idTree[active_element].slave_selected = getNrOfFirstBitSet(mask_slaves);
+//     idTree[active_element].got_one = 255;
+//     idTree[active_element].got_zero = 255;
 
-    return active_element;
-}
+//     return active_element;
+// }
 
 bool OneWireHub::poll(void)
 {
@@ -175,9 +171,9 @@ bool OneWireHub::poll(void)
 
     while (true)
     {
-        // this additional check prevents an infinite loop when calling this FN without sensors attached
-        if (slave_count == 0)
-            return true;
+        // // this additional check prevents an infinite loop when calling this FN without sensors attached
+        // if (slave_count == 0)
+        //     return true;
 
         // Once reset is done, go to next step
         if (checkReset())
@@ -287,70 +283,70 @@ bool OneWireHub::showPresence(void)
     return false;
 }
 
-// note: this FN calls sendBit() & recvBit() but doesn't handle interrupts -> calling FN must do this
-void OneWireHub::searchIDTree(void)
-{
-    uint8_t position_IDBit = 0;
-    uint8_t trigger_pos = 0;
-    uint8_t active_slave = idTree[trigger_pos].slave_selected;
-    uint8_t trigger_bit = idTree[trigger_pos].id_position;
+// // note: this FN calls sendBit() & recvBit() but doesn't handle interrupts -> calling FN must do this
+// void OneWireHub::searchIDTree(void)
+// {
+//     uint8_t position_IDBit = 0;
+//     uint8_t trigger_pos = 0;
+//     uint8_t active_slave = idTree[trigger_pos].slave_selected;
+//     uint8_t trigger_bit = idTree[trigger_pos].id_position;
 
-    while (position_IDBit < 64)
-    {
-        // if junction is reached, act different
-        if (position_IDBit == trigger_bit)
-        {
-            if (sendBit(false))
-                return;
-            if (sendBit(false))
-                return;
+//     while (position_IDBit < 64)
+//     {
+//         // if junction is reached, act different
+//         if (position_IDBit == trigger_bit)
+//         {
+//             if (sendBit(false))
+//                 return;
+//             if (sendBit(false))
+//                 return;
 
-            const bool bit_recv = recvBit();
-            if (_error != Error::NO_ERROR)
-                return;
+//             const bool bit_recv = recvBit();
+//             if (_error != Error::NO_ERROR)
+//                 return;
 
-            // switch to next junction
-            trigger_pos = bit_recv ? idTree[trigger_pos].got_one : idTree[trigger_pos].got_zero;
+//             // switch to next junction
+//             trigger_pos = bit_recv ? idTree[trigger_pos].got_one : idTree[trigger_pos].got_zero;
 
-            active_slave = idTree[trigger_pos].slave_selected;
+//             active_slave = idTree[trigger_pos].slave_selected;
 
-            trigger_bit = (trigger_pos == 255) ? uint8_t(255) : idTree[trigger_pos].id_position;
-        }
-        else
-        {
-            const uint8_t pos_byte = (position_IDBit >> 3);
-            const uint8_t mask_bit = (static_cast<uint8_t>(1) << (position_IDBit & (7)));
-            bool bit_send;
+//             trigger_bit = (trigger_pos == 255) ? uint8_t(255) : idTree[trigger_pos].id_position;
+//         }
+//         else
+//         {
+//             const uint8_t pos_byte = (position_IDBit >> 3);
+//             const uint8_t mask_bit = (static_cast<uint8_t>(1) << (position_IDBit & (7)));
+//             bool bit_send;
 
-            if ((slave_list[active_slave]->ID[pos_byte] & mask_bit) != 0)
-            {
-                bit_send = true;
-                if (sendBit(true))
-                    return;
-                if (sendBit(false))
-                    return;
-            }
-            else
-            {
-                bit_send = false;
-                if (sendBit(false))
-                    return;
-                if (sendBit(true))
-                    return;
-            }
+//             if ((slave_list[active_slave]->ID[pos_byte] & mask_bit) != 0)
+//             {
+//                 bit_send = true;
+//                 if (sendBit(true))
+//                     return;
+//                 if (sendBit(false))
+//                     return;
+//             }
+//             else
+//             {
+//                 bit_send = false;
+//                 if (sendBit(false))
+//                     return;
+//                 if (sendBit(true))
+//                     return;
+//             }
 
-            const bool bit_recv = recvBit();
-            if (_error != Error::NO_ERROR)
-                return;
+//             const bool bit_recv = recvBit();
+//             if (_error != Error::NO_ERROR)
+//                 return;
 
-            if (bit_send != bit_recv)
-                return;
-        }
-        position_IDBit++;
-    }
+//             if (bit_send != bit_recv)
+//                 return;
+//         }
+//         position_IDBit++;
+//     }
 
-    slave_selected = slave_list[active_slave];
-}
+//     slave_selected = slave_list[active_slave];
+// }
 
 bool OneWireHub::recvAndProcessCmd(void)
 {
@@ -359,13 +355,13 @@ bool OneWireHub::recvAndProcessCmd(void)
     if (slave_count == 1u)
     {
 
-        slave_selected = slave_list[0];
+        // slave_selected = slave_list;
         // TODO: this might be expensive for weak uC and OW in Overdrive and only one device emulated
         //  -> look into optimizations (i.e. preselect when only one device present?)
 
-        if (slave_selected->skip_multidrop)
+        if (slave_list->skip_multidrop)
         {
-            slave_selected->duty(this);
+            slave_list->duty(this);
             return (_error != Error::NO_ERROR);
         }
     }
@@ -402,13 +398,13 @@ bool OneWireHub::recvAndProcessCmd(void)
         // NOTE: If more than one slave is present on the bus,
         // and a read command is issued following the Skip ROM command,
         // data collision will occur on the bus as multiple slaves transmit simultaneously
-        if ((slave_selected == nullptr) && (slave_count == 1))
+        if ((slave_list == nullptr) && (slave_count == 1))
         {
-            slave_selected = slave_list[0];
+            slave_list = slave_list;
         }
-        if (slave_selected != nullptr)
+        if (slave_list != nullptr)
         {
-            slave_selected->duty(this);
+            slave_list->duty(this);
         }
         break;
 
@@ -421,7 +417,7 @@ bool OneWireHub::recvAndProcessCmd(void)
         //     // only usable when there is ONE slave on the bus
         //     if ((slave_selected == nullptr) && (slave_count == 1))
         //     {
-        //         slave_selected = slave_list[0];
+        //         slave_selected = slave_list;
         //     }
         //     if (slave_selected != nullptr)
         //     {

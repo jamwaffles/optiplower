@@ -76,8 +76,18 @@ make load_rom
 
 - <https://github.com/orgua/OneWireHub> for OneWire peripheral impl
 - Needs ATTiny arduino cores from <https://github.com/damellis/attiny>
+  - TLDR
+    `https://raw.githubusercontent.com/damellis/attiny/ide-1.6.x-boards-manager/package_damellis_attiny_index.json`
+
+## Arduino CLI
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=~/.local/bin sh
+```
 
 ## Burning bootloader issues
+
+> Don't actually need to use the bootloader - I can use the USBASP directly.
 
 Arduino IDE 2.x, "burn bootloader" with usbasp programmer selected.
 

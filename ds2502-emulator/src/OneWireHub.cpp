@@ -9,30 +9,13 @@ OneWireHub::OneWireHub(const uint8_t pin)
 
     slave_count = 0;
     slave_selected = nullptr;
-
-#if OVERDRIVE_ENABLE
-    od_mode = false;
-#endif
-
-    for (uint8_t i = 0; i < ONEWIRESLAVE_LIMIT; ++i)
-    {
-        slave_list[i] = nullptr;
-    }
+    slave_list[0] = nullptr;
 
     // prepare pin
     pin_bitMask = PIN_TO_BITMASK(pin);
     pin_baseReg = PIN_TO_BASEREG(pin);
     pinMode(pin, INPUT); // first port-access should by done by this FN, does more than DIRECT_MODE_....
     DIRECT_WRITE_LOW(pin_baseReg, pin_bitMask);
-
-    // prepare debug:
-    if (USE_GPIO_DEBUG)
-    {
-        debug_bitMask = PIN_TO_BITMASK(GPIO_DEBUG_PIN);
-        debug_baseReg = PIN_TO_BASEREG(GPIO_DEBUG_PIN);
-        pinMode(GPIO_DEBUG_PIN, OUTPUT);
-        DIRECT_WRITE_LOW(debug_baseReg, debug_bitMask);
-    }
 
     static_assert(VALUE_IPL, "Your architecture has not been calibrated yet, please run examples/debug/calibrate_by_bus_timing and report instructions per loop (IPL) to https://github.com/orgua/OneWireHub");
     static_assert(ONEWIRE_TIME_VALUE_MIN > 2, "YOUR ARCHITECTURE IS TOO SLOW, THIS MAY RESULT IN TIMING-PROBLEMS"); // it could work though, never tested
@@ -41,44 +24,9 @@ OneWireHub::OneWireHub(const uint8_t pin)
 // attach a sensor to the hub
 uint8_t OneWireHub::attach(OneWireItem &sensor)
 {
-    if (slave_count >= ONEWIRESLAVE_LIMIT)
-        return 255; // hub is full
-
-    // demonstrate an 1ms-Low-State on the debug pin (only if bus stays high during this time)
-    // done here because this FN is always called before hub is used
-    if (USE_GPIO_DEBUG)
-    {
-        static bool calibrate_loop_timing = true;
-        if (calibrate_loop_timing)
-        {
-            calibrate_loop_timing = false;
-            waitLoops1ms();
-        }
-    }
-
-    // find position of next free storage-position
-    uint8_t position = 255;
-    for (uint8_t i = 0; i < ONEWIRESLAVE_LIMIT; ++i)
-    {
-        // check for already attached sensors
-        if (slave_list[i] == &sensor)
-        {
-            return i;
-        }
-        // store position of first empty space
-        if ((position > ONEWIRESLAVE_LIMIT) && (slave_list[i] == nullptr))
-        {
-            position = i;
-        }
-    }
-
-    if (position == 255)
-        return 255;
-
-    slave_list[position] = &sensor;
-    slave_count++;
-    buildIDTree();
-    return position;
+    slave_list[0] = &sensor;
+    slave_count = 1;
+    return 0;
 }
 
 bool OneWireHub::detach(const OneWireItem &sensor)

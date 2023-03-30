@@ -82,16 +82,15 @@ private:
     volatile io_reg_t *debug_baseReg;
 #endif
 
-    uint8_t slave_count;
     OneWireItem *slave_list; // private slave-list (use attach/detach)
 
-    struct IDTree
-    {
-        uint8_t slave_selected; // for which slave is this jump-command relevant
-        uint8_t id_position;    // where does the algorithm has to look for a junction
-        uint8_t got_zero;       // if 0 switch to which tree branch
-        uint8_t got_one;        // if 1 switch to which tree branch
-    } idTree[ONEWIRE_TREE_SIZE];
+    // struct IDTree
+    // {
+    //     uint8_t slave_selected; // for which slave is this jump-command relevant
+    //     uint8_t id_position;    // where does the algorithm has to look for a junction
+    //     uint8_t got_zero;       // if 0 switch to which tree branch
+    //     uint8_t got_one;        // if 1 switch to which tree branch
+    // } idTree[ONEWIRE_TREE_SIZE];
 
     uint8_t buildIDTree(void);
     uint8_t buildIDTree(uint8_t position_IDBit, mask_t slave_mask);
@@ -122,7 +121,7 @@ public:
     OneWireHub &operator=(const OneWireHub &hub) = delete; // disallow copy assignment
     OneWireHub &operator=(OneWireHub &&hub) = delete;      // disallow move assignment
 
-    uint8_t attach(OneWireItem &sensor);
+    void attach(OneWireItem &sensor);
     bool detach(const OneWireItem &sensor);
     bool detach(uint8_t slave_number);
 

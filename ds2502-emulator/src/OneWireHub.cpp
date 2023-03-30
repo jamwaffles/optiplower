@@ -7,7 +7,6 @@ OneWireHub::OneWireHub(const uint8_t pin)
 {
     _error = Error::NO_ERROR;
 
-    slave_count = 0;
     slave_list = nullptr;
 
     // prepare pin
@@ -21,11 +20,9 @@ OneWireHub::OneWireHub(const uint8_t pin)
 }
 
 // attach a sensor to the hub
-uint8_t OneWireHub::attach(OneWireItem &sensor)
+void OneWireHub::attach(OneWireItem &sensor)
 {
     slave_list = &sensor;
-    slave_count = 1;
-    return 0;
 }
 
 bool OneWireHub::detach(const OneWireItem &sensor)
@@ -50,14 +47,7 @@ bool OneWireHub::detach(const OneWireItem &sensor)
 
 bool OneWireHub::detach(const uint8_t slave_number)
 {
-    if (slave_list == nullptr)
-        return false;
-
-    slave_list = nullptr;
-    slave_count--;
-    // buildIDTree();
-
-    return true;
+    //
 }
 
 // // just look through each bit of each ID and build a tree, so there are n=slaveCount decision-points
@@ -351,19 +341,14 @@ bool OneWireHub::showPresence(void)
 bool OneWireHub::recvAndProcessCmd(void)
 {
 
-    // If the only slave is not multidrop compatible, pass all data handling to the slave
-    if (slave_count == 1u)
+    // slave_selected = slave_list;
+    // TODO: this might be expensive for weak uC and OW in Overdrive and only one device emulated
+    //  -> look into optimizations (i.e. preselect when only one device present?)
+
+    if (slave_list->skip_multidrop)
     {
-
-        // slave_selected = slave_list;
-        // TODO: this might be expensive for weak uC and OW in Overdrive and only one device emulated
-        //  -> look into optimizations (i.e. preselect when only one device present?)
-
-        if (slave_list->skip_multidrop)
-        {
-            slave_list->duty(this);
-            return (_error != Error::NO_ERROR);
-        }
+        slave_list->duty(this);
+        return (_error != Error::NO_ERROR);
     }
 
     uint8_t address[8], cmd;
@@ -394,18 +379,7 @@ bool OneWireHub::recvAndProcessCmd(void)
         //     return false; // always trigger a re-init after searchIDTree
 
     case 0xCC: // SKIP ROM
-
-        // NOTE: If more than one slave is present on the bus,
-        // and a read command is issued following the Skip ROM command,
-        // data collision will occur on the bus as multiple slaves transmit simultaneously
-        if ((slave_list == nullptr) && (slave_count == 1))
-        {
-            slave_list = slave_list;
-        }
-        if (slave_list != nullptr)
-        {
-            slave_list->duty(this);
-        }
+        slave_list->duty(this);
         break;
 
     case 0x0F: // OLD READ ROM

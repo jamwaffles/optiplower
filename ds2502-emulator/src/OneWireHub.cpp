@@ -345,11 +345,11 @@ bool OneWireHub::recvAndProcessCmd(void)
     // TODO: this might be expensive for weak uC and OW in Overdrive and only one device emulated
     //  -> look into optimizations (i.e. preselect when only one device present?)
 
-    if (slave_list->skip_multidrop)
-    {
-        slave_list->duty(this);
-        return (_error != Error::NO_ERROR);
-    }
+    // if (slave_list->skip_multidrop)
+    // {
+    //     slave_list->duty(this);
+    //     return (_error != Error::NO_ERROR);
+    // }
 
     uint8_t address[8], cmd;
     bool flag = false;

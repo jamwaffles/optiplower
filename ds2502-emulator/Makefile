@@ -1,5 +1,4 @@
 PROJECT=ds2502-emulator
-GCC_MCU?=attiny85
 AVRDUDE_MCU?=t85
 
 AVRDUDE_FLAGS?=-c usbasp -P /dev/ttyUSB0
@@ -14,6 +13,9 @@ $(PROJECT).ino.hex:
 
 program: $(PROJECT).ino.hex
 	avrdude $(AVRDUDE_FLAGS) -U flash:w:./build/$<
+
+load_eeprom: eeprom-data.hex
+	avrdude $(AVRDUDE_FLAGS) -U eeprom:w:$<
 
 fuses:
 	avrdude $(AVRDUDE_FLAGS) $(FUSES)

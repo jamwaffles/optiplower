@@ -44,50 +44,33 @@ DigiSpark ATTiny85 devboard LED is connected to PB0
 
 ## Firmware setup
 
-```bash
-apt install gcc-avr avr-libc
-# For reading/writing IC once programmed
-pip3 install pyserial
-
-make
-
-# Write to device
-make load
-
-# Write EEPROM (generated with `dell-charger-data-editor.py`)
-make load_eeprom
-
-# Write code
-make load_rom
-```
-
-## Circuit notes
-
-- Using a DigiSpark module for testing
-- Enable internal pullups on ATTiny85
-- Run ATTiny at 2.7v (lowest allowable for non-`V` chips), otherwise the pin doesn't pull high
-  enough
-- Ensure AVR fuses are written with `cd firmware && make fuses` otherwise EEPROM gets blatted after
-  every flash
-
----
-
-# A different attempt, this time with Arduino
-
-- <https://github.com/orgua/OneWireHub> for OneWire peripheral impl
-- Needs ATTiny arduino cores from <https://github.com/damellis/attiny>
-  - TLDR
-    `https://raw.githubusercontent.com/damellis/attiny/ide-1.6.x-boards-manager/package_damellis_attiny_index.json`
-
-## Arduino CLI
+Uses Arduino CLI
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=~/.local/bin sh
 ```
 
+## Programming
+
+You'll need to edit the `memory` variable in `ds2502-emulator/src/DS2502.h` to change how the
+charger identifies.
+
+```bash
+cd ds2502-emulator
+
+make
+
+make program
+
+make fuses
+```
+
+Works with ATTiny25.
+
 ## Burning bootloader issues
 
-> Don't actually need to use the bootloader - I can use the USBASP directly.
+> Don't actually need to use the bootloader - I can use the USBASP directly. This section is just
+> left here as a note.
 
 Arduino IDE 2.x, "burn bootloader" with usbasp programmer selected.
 

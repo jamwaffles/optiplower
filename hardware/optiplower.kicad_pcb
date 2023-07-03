@@ -1,7 +1,7 @@
 (kicad_pcb (version 20221018) (generator pcbnew)
 
   (general
-    (thickness 1.6)
+    (thickness 0.8)
   )
 
   (paper "A4")
@@ -47,7 +47,7 @@
       (layer "F.Paste" (type "Top Solder Paste"))
       (layer "F.Mask" (type "Top Solder Mask") (thickness 0.01))
       (layer "F.Cu" (type "copper") (thickness 0.035))
-      (layer "dielectric 1" (type "core") (thickness 1.51) (material "FR4") (epsilon_r 4.5) (loss_tangent 0.02))
+      (layer "dielectric 1" (type "core") (thickness 0.71) (material "FR4") (epsilon_r 4.5) (loss_tangent 0.02))
       (layer "B.Cu" (type "copper") (thickness 0.035))
       (layer "B.Mask" (type "Bottom Solder Mask") (thickness 0.01))
       (layer "B.Paste" (type "Bottom Solder Paste"))
@@ -255,11 +255,10 @@
     (property "Manufacturer" "Microchip")
     (property "Sheetfile" "optiplower.kicad_sch")
     (property "Sheetname" "")
-    (property "exclude_from_bom" "")
     (property "ki_description" "20MHz, 2kB Flash, 128B SRAM, 128B EEPROM, debugWIRE, SOIC-8")
     (property "ki_keywords" "AVR 8bit Microcontroller tinyAVR")
     (path "/7a52e9f9-2ddd-46b5-a37e-73a28ab86803")
-    (attr smd exclude_from_bom)
+    (attr smd)
     (fp_text reference "U3" (at 2.9098 3.2766) (layer "F.SilkS")
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp b5b58be5-ed34-4e3d-8001-d3603a56b5fd)

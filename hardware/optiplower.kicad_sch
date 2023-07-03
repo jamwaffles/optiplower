@@ -1595,7 +1595,7 @@
   )
 
   (symbol (lib_id "MCU_Microchip_ATtiny:ATtiny25-20SS") (at 142.24 97.79 0) (unit 1)
-    (in_bom no) (on_board yes) (dnp no) (fields_autoplaced)
+    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7a52e9f9-2ddd-46b5-a37e-73a28ab86803)
     (property "Reference" "U3" (at 128.27 97.155 0)
       (effects (font (size 1.27 1.27)) (justify right))

@@ -467,7 +467,7 @@
       "idf": "",
       "netlist": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "../../../Downloads/3D/optiplower.step",
       "vrml": ""
     },
     "page_layout_descr_file": ""

@@ -65,7 +65,9 @@ make program
 make fuses
 ```
 
-Works with ATTiny25.
+Works with ATTiny25-10SSU, but can be made to target ATTiny85, etc by modifying the `AVRDUDE_MCU?`
+line in `./ds2502-emulator/Makefile` along with the `fqbn...` line in
+`./ds2502-emulator/sketch.yaml`.
 
 ## Burning bootloader issues
 

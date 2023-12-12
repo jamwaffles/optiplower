@@ -35,6 +35,13 @@ build your own.
 
 DigiSpark ATTiny85 devboard LED is connected to PB0
 
+## Connection
+
+The output connector is designed for a 5-way 1.27mm pitch ribbon cable. The 5 pins mirror the layout
+of the pins on the barrel jack PCB connector.
+
+![](./img/optiplower-connections.png)
+
 ## Sample dumps
 
 - `DELL00AC090195046CN09T` (90w) from

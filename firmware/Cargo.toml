@@ -1,0 +1,15 @@
+[package]
+name = "firmware"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+cortex-m-rtic = "1.1.4"
+defmt = "0.3.5"
+defmt-rtt = "0.4.0"
+fugit = "0.3.7"
+one-wire-bus = "0.1.1"
+panic-halt = "0.2.0"
+stm32f4xx-hal = { version = "0.19.0", features = ["stm32f411", "rtic"] }

@@ -1,6 +1,6 @@
 [target.thumbv7em-none-eabihf]
-# NOTE: This `--probe` arg is for my F446 Nucleo
-runner = 'probe-rs run --chip STM32F446RETx --probe 0483:374b:066AFF383133524157183054'
+# NOTE: This `--probe` arg is for my F411 Nucleo used as a bus master
+runner = 'probe-rs run --chip STM32F411CEUx --probe 0483:374b:0668FF535155878281151838'
 rustflags = [
     # `flip-link` moves stack at the end of flash
     #"-C", "linker=flip-link",

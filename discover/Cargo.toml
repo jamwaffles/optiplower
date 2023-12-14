@@ -1,5 +1,5 @@
 [package]
-name = "firmware"
+name = "discover"
 version = "0.1.0"
 edition = "2021"
 
@@ -13,7 +13,7 @@ embedded-hal = "0.2.7"
 fugit = "0.3.7"
 one-wire-bus = "0.1.1"
 panic-halt = "0.2.0"
-stm32f4xx-hal = { version = "0.19.0", features = ["stm32f446", "rtic"] }
+stm32f4xx-hal = { version = "0.19.0", features = ["stm32f411", "rtic"] }
 
 [profile.release]
 debug = true

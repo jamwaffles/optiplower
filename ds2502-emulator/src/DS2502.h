@@ -7,7 +7,7 @@
 
 #include "OneWireItem.h"
 
-// EEPROM strings, the length is always 42 bytes, including 2 bytes of CRC16 checksum.
+// EEPROM strings, the length is always 42 bytes, including 2 bytes of CRC16/ARC checksum.
 constexpr uint8_t chargerStrlen{42};
 
 // 45W
@@ -17,10 +17,13 @@ constexpr uint8_t chargerStrlen{42};
 // https://nickschicht.wordpress.com/2009/07/15/dell-power-supply-fault/
 // 65W
 constexpr const uint8_t *memory = "DELL00AC065195033CN05U0927161552F31B8A03\xBC\x8F";
+// CRC checksup is correct for this string, but it seems it MUST include "DELL" at the beginning.
+// constexpr const uint8_t *memory = "FOOF00AC065195033CN05U0927161552F31B8A03\xDE\x80";
 
 // 90W
 // constexpr uint8_t char* memory = "DELL00AC090195046CN0C80234866161R23H8A03\x4D\x7C";
 
+// NOTE: XL4015 only supports about 90W! Never enable this option!
 // 130W
 // I made this up, works with Dell Inspiron 15R N5110 and Dell Inspiron 15R 5521
 // constexpr uint8_t char* memory = "DELL00AC130195067CN0CDF577243865Q27F2233\x9D\x72";

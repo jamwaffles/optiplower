@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 cortex-m-rtic = "1.1.4"
+debouncr = "0.2.2"
 defmt = "0.3.5"
 defmt-rtt = "0.4.0"
 embedded-hal = "0.2.7"

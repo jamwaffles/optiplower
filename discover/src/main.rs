@@ -29,7 +29,7 @@ mod app {
     #[local]
     struct Local {
         led: PA5<Output>,
-        ow: OneWire<PC0<Output<OpenDrain>>>,
+        // ow: OneWire<PC0<Output<OpenDrain>>>,
         delay: DelayUs<TIM5>,
     }
 
@@ -68,7 +68,14 @@ mod app {
 
         tick::spawn().ok();
 
-        (Shared {}, Local { led, ow, delay }, init::Monotonics(mono))
+        (
+            Shared {},
+            Local {
+                led,
+                /* ow, */ delay,
+            },
+            init::Monotonics(mono),
+        )
     }
 
     #[task(local = [led])]

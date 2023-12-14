@@ -10,10 +10,11 @@ use embedded_hal::blocking::delay::DelayUs;
 
 #[rtic::app(device = stm32f4xx_hal::pac, dispatchers = [USART1])]
 mod app {
+    use debouncr::{debounce_2, Debouncer, Edge, Repeat2};
     use fugit::ExtU64;
     use one_wire_bus::OneWire;
     use stm32f4xx_hal::{
-        gpio::{OpenDrain, Output, PinState, Pull, PA5, PC0},
+        gpio::{DefaultMode, Input, OpenDrain, Output, PinState, Pull, PA5, PC0},
         pac::{self, TIM5},
         prelude::*,
         timer::{DelayUs, MonoTimer64Us}, // Extended 64-bit timer for 16/32-bit TIMs
@@ -25,7 +26,8 @@ mod app {
     #[local]
     struct Local {
         led: PA5<Output>,
-        ow: OneWire<PC0<Output<OpenDrain>>>,
+        ow: PC0<Input>,
+        ow_state: Debouncer<u8, Repeat2>,
         delay: DelayUs<TIM5>,
     }
 
@@ -44,7 +46,7 @@ mod app {
         let led = gpioa.pa5.into_push_pull_output();
         defmt::info!("Start");
 
-        let one_wire_pin = gpioc.pc0.into_open_drain_output();
+        let one_wire_pin = gpioc.pc0.into_floating_input();
 
         // Does not work for STM32F411: Forego the external 5K pullup and use internal MCU pullup
         // instead.
@@ -58,20 +60,43 @@ mod app {
 
         defmt::info!("Init complete");
 
-        let mut ow = OneWire::new(one_wire_pin).expect("OneWire init");
-
-        find_device(&mut delay, &mut ow);
+        // let mut ow = OneWire::new(one_wire_pin).expect("OneWire init");
 
         tick::spawn().ok();
 
-        (Shared {}, Local { led, ow, delay }, init::Monotonics(mono))
+        (
+            Shared {},
+            Local {
+                led,
+                ow: one_wire_pin,
+                ow_state: debounce_2(false),
+                delay,
+            },
+            init::Monotonics(mono),
+        )
     }
 
-    #[task(local = [led])]
+    #[task(local = [led, ow, ow_state ])]
     fn tick(ctx: tick::Context) {
-        tick::spawn_after(1_u64.secs()).ok();
+        // Poll button
+        let pressed: bool = ctx.local.ow.is_low();
+
+        // Update state
+        let edge = ctx.local.ow_state.update(pressed);
+
+        if let Some(edge) = edge {
+            defmt::info!("Edge {:?}", edge as u8);
+        }
+
+        // if edge == Some(Edge::Rising) {
+        //     ctx.spawn.button_pressed().unwrap();
+        // } else if edge == Some(Edge::Falling) {
+        //     ctx.spawn.button_released().unwrap();
+        // }
 
         ctx.local.led.toggle();
+
+        tick::spawn_after(1_u64.micros()).ok();
     }
 
     /// We're only looking for one device on the bus.
